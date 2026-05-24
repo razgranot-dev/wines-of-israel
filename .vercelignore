@@ -1,0 +1,4 @@
+# Inherits .gitignore. Extra exclusions for the live deploy:
+serve.py
+design.md
+scraps/

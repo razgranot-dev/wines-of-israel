@@ -1,0 +1,4446 @@
+/* ====================================================
+   Wines of Israel — light mode
+   Palette: warm ivory, champagne, soft stone, deep wine accent, gold
+   Type:    Cormorant Garamond (display) + Outfit (UI)
+   ==================================================== */
+
+:root {
+  --bg:       #f4ecd8;     /* warm ivory */
+  --bg-2:     #ede2c4;     /* deeper champagne */
+  --bg-3:     #fbf6e8;     /* lightest cream — for cards */
+  --bg-4:     #faf3df;     /* near-white warm */
+  --ink:      #2a1810;     /* warm dark brown */
+  --ink-dim:  #6b5644;     /* mid neutral */
+  --ink-mute: #9b8870;     /* soft stone */
+  --wine:     #5a0e1f;     /* deep oxblood */
+  --wine-2:   #7c1a2c;     /* lifted wine */
+  --wine-3:   #a52d3d;     /* warm wine highlight */
+  --gold:     #b89456;     /* warm gold */
+  --gold-dim: #8a6b3a;     /* darker gold */
+  --stone:    #a8967a;     /* warm stone */
+
+  --serif: "Cormorant Garamond", "Cormorant", "EB Garamond", serif;
+  --sans:  "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --rule: rgba(42, 24, 16, 0.14);
+  --rule-soft: rgba(42, 24, 16, 0.07);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, svg { display: block; }
+a { color: inherit; text-decoration: none; }
+em { font-style: italic; font-family: var(--serif); color: var(--wine); font-weight: 400; }
+button { font: inherit; }
+
+/* Custom selection — warm wine wash */
+::selection { background: rgba(122, 26, 44, 0.22); color: var(--ink); }
+
+/* Refined scrollbar — wine accent on warm cream track */
+html { scrollbar-color: var(--wine-2) var(--bg-2); scrollbar-width: thin; }
+body::-webkit-scrollbar { width: 11px; height: 11px; }
+body::-webkit-scrollbar-track { background: var(--bg-2); }
+body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--gold) 0%, var(--wine-2) 60%, var(--wine) 100%);
+  border-radius: 999px;
+  border: 2px solid var(--bg-2);
+}
+body::-webkit-scrollbar-thumb:hover { background: var(--wine); }
+
+/* Global focus state */
+:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Paper texture overlay — very subtle warm noise above ivory */
+.paper-texture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(circle at 20% 40%, rgba(122, 76, 44, 0.6) 0.4px, transparent 0.9px),
+    radial-gradient(circle at 70% 20%, rgba(122, 76, 44, 0.5) 0.5px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(122, 76, 44, 0.7) 0.4px, transparent 0.9px),
+    radial-gradient(circle at 90% 60%, rgba(122, 76, 44, 0.5) 0.45px, transparent 0.95px);
+  background-size: 180px 180px, 220px 220px, 200px 200px, 240px 240px;
+}
+
+/* ====================================================
+   TYPOGRAPHY SCALE
+   ==================================================== */
+.display-xl {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(56px, 9vw, 152px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.display-l {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(40px, 5.6vw, 92px);
+  line-height: 1.0;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.eyebrow {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--wine);
+  margin-bottom: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.eyebrow::before {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--wine);
+  opacity: 0.6;
+}
+.eyebrow-light { color: var(--wine); }
+
+.lede {
+  font-family: var(--serif);
+  font-size: clamp(17px, 1.4vw, 22px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 56ch;
+  margin: 28px 0 0;
+}
+
+/* ====================================================
+   NAV
+   ==================================================== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+.nav-scrolled {
+  background: rgba(244, 236, 216, 0.85);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom-color: var(--rule);
+}
+.nav-inner {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.nav-brand { display: flex; align-items: center; gap: 14px; }
+.nav-mark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  width: 36px; height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.05em;
+  background: rgba(255,255,255,0.4);
+}
+.nav-name {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  font-weight: 500;
+  color: var(--ink);
+}
+.nav-links {
+  display: flex;
+  gap: 38px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12.5px;
+  letter-spacing: 0.18em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+.nav-links a { color: var(--ink-dim); transition: color 0.25s; }
+.nav-links a:hover { color: var(--wine); }
+.nav-cta {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 11px 20px;
+  border: 1px solid var(--wine);
+  color: var(--wine);
+  transition: background 0.25s, color 0.25s;
+}
+.nav-cta:hover { background: var(--wine); color: var(--bg); }
+
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-inner { padding: 14px 22px; }
+}
+
+/* ====================================================
+   CINEMA STAGE — sticky pinned hero + pour
+   ==================================================== */
+.cinema-section {
+  position: relative;
+  height: 500vh;
+  background: var(--bg);
+}
+.cinema-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Vineyard background image (image-slot placeholder) */
+.vineyard-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: auto;
+  overflow: hidden;
+}
+.vineyard-bg image-slot {
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+}
+/* Hide the dashed border + caption + drop icon when empty so the SVG vineyard
+   shows as the default backdrop. A real drop still works (transparent target). */
+.vineyard-bg image-slot:not([data-filled]) {
+  opacity: 0;
+}
+.vineyard-bg .vineyard-placeholder { z-index: 1; pointer-events: none; }
+/* Atmospheric SVG placeholder shown through image-slot until user drops a photo */
+.vineyard-placeholder {
+  position: absolute; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Soft haze layer over vineyard so bottle stands out */
+.bg-haze {
+  position: absolute; inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 55%, rgba(255, 248, 230, 0.55), transparent 70%),
+    linear-gradient(180deg, rgba(244,236,216,0.4) 0%, rgba(244,236,216,0.1) 35%, rgba(244,236,216,0.55) 100%);
+}
+.bg-grain {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(rgba(80, 50, 30, 0.18) 0.5px, transparent 0.6px);
+  background-size: 4px 4px;
+}
+
+/* Bottle anchor */
+.cinema-bottle {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+}
+.cinema-bottle-inner {
+  position: relative;
+  will-change: transform;
+}
+.bottle-wrap {
+  filter: drop-shadow(0 32px 40px rgba(60, 30, 20, 0.32));
+  will-change: transform;
+  position: relative;
+}
+.bottle-svg {
+  width: clamp(120px, 12vw, 160px);
+  height: auto;
+  max-height: 56vh;
+}
+
+/* Bottle spill burst — glow behind the wine emerging from middle */
+.bottle-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px; height: 80px;
+  margin-left: -40px;
+  margin-top: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(165, 45, 60, 0.55) 0%, rgba(122, 18, 36, 0.35) 30%, rgba(122, 18, 36, 0) 70%);
+  z-index: 3;
+  pointer-events: none;
+  filter: blur(8px);
+  will-change: transform, opacity;
+}
+
+/* Pour stream — positioned at the bottle middle, falls + flows */
+.pour-stream {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Pour splash — impact burst beneath the stream */
+.pour-splash {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Glass impact splash — visible inside the glass during pour */
+.glass-impact {
+  position: absolute;
+  left: 50%;
+  top: 32%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ====================================================
+   SCROLL-SCRUBBED CINEMATIC VIDEO
+   ==================================================== */
+.scrub-video-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  background: var(--bg);
+}
+.scrub-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 35% 30%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Multi-pass mask — aggressively hides the wine impact area at the bottom-
+   right (where the stream lands on the stone wall + the Veo watermark) while
+   leaving the bottle and most of the landscape visible. The radial pass
+   targets the impact zone; the linear pass fades the bottom into the bg. */
+.scrub-video-mask {
+  position: absolute;
+  inset: 0;
+  background:
+    /* 1. Aggressive bottom-right corner fade: hides wine impact + watermark */
+    radial-gradient(ellipse 80% 70% at 72% 105%,
+      rgba(244, 236, 216, 1) 0%,
+      rgba(244, 236, 216, 1) 18%,
+      rgba(244, 236, 216, 0.92) 32%,
+      rgba(244, 236, 216, 0.62) 48%,
+      rgba(244, 236, 216, 0.25) 65%,
+      rgba(244, 236, 216, 0) 82%),
+    /* 2. Bottom-edge vertical fade — softens stone wall transition */
+    linear-gradient(180deg,
+      rgba(244, 236, 216, 0) 38%,
+      rgba(244, 236, 216, 0.15) 55%,
+      rgba(244, 236, 216, 0.55) 72%,
+      rgba(244, 236, 216, 0.92) 88%,
+      rgba(244, 236, 216, 1) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Vignette tuned for the video — softens hard edges of the cropped frame */
+.scrub-video-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 30%, transparent 45%, rgba(42, 24, 16, 0.22) 95%);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
+/* Atmosphere layers that sit ABOVE the video — pulled forward */
+.cinema-sticky .scrub-overlay { z-index: 3; }
+
+/* Stronger text glow for legibility over the bright video */
+.cinema-sticky .hero-text .display-xl,
+.cinema-sticky .story-text .display-l,
+.cinema-sticky .flow-text .display-l {
+  text-shadow:
+    0 0 1px rgba(255, 245, 220, 0.8),
+    0 0 12px rgba(255, 220, 170, 0.45),
+    0 0 36px rgba(255, 200, 140, 0.32),
+    0 2px 1px rgba(42, 24, 16, 0.15);
+}
+.cinema-sticky .hero-text .lede,
+.cinema-sticky .story-text .lede,
+.cinema-sticky .flow-text .lede {
+  text-shadow: 0 0 14px rgba(255, 248, 232, 0.85), 0 1px 1px rgba(42, 24, 16, 0.15);
+}
+.cinema-sticky .eyebrow {
+  text-shadow: 0 0 10px rgba(255, 245, 220, 0.7);
+}
+
+/* CTA buttons need a subtle pad behind them for video legibility */
+.cinema-sticky .cta-row { position: relative; z-index: 9; }
+.cinema-sticky .cta-row::before {
+  content: "";
+  position: absolute;
+  inset: -18px -32px;
+  background: radial-gradient(ellipse at center, rgba(244,236,216,0.85), transparent 75%);
+  filter: blur(8px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Hero side meta vertical labels — keep readable on bright video edges */
+.cinema-sticky .hero-side-meta {
+  text-shadow: 0 0 8px rgba(244, 236, 216, 0.9);
+}
+
+/* ============================================================================
+   WINE-MAGAZINE REWORK — vineyard, terroir, hospitality.
+   Replaces the prior editorial-tech pass with a wine campaign aesthetic.
+   Dominant wine red; serif italics; embossed wax seal; vine ornaments;
+   no Roman-numeral cards, no "system operational" dots, no SaaS columns.
+   ============================================================================ */
+
+/* ── Wine eyebrow — italic serif phrase between fleurons ─── */
+.wine-eyebrow {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.1vw, 18px);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--wine);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.wine-eyebrow em { font-style: italic; color: var(--wine); }
+.wine-eyebrow .fleuron { flex-shrink: 0; }
+
+/* Hero-specific eyebrow — slightly tracked, fades the words */
+.hero-eyebrow {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.3vw, 22px);
+  color: var(--wine-2);
+  letter-spacing: 0.01em;
+  text-align: center;
+  display: inline-block;
+  position: relative;
+  padding: 0 36px;
+}
+.hero-eyebrow em { font-style: italic; color: var(--wine); }
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: "✦";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--gold);
+}
+.hero-eyebrow::before { left: 0; }
+.hero-eyebrow::after  { right: 0; }
+
+/* Vintage tag — replaces brand-mark-watermark */
+.vintage-tag {
+  position: absolute;
+  top: 11vh;
+  left: 6vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 9;
+}
+.vintage-tag-word {
+  font-family: var(--sans);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.46em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  text-shadow: 0 0 10px rgba(244, 236, 216, 0.95);
+}
+.vintage-tag-year {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--wine);
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(244, 236, 216, 0.9), 0 1px 1px rgba(60, 30, 20, 0.18);
+}
+.vintage-tag::after {
+  content: "";
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, var(--wine), transparent);
+  margin-top: 8px;
+}
+
+/* ── Section Rest — organic divider between major sections ──
+   Replaces the sterile Roman-numeral chapter cards. A vine
+   sprig + italic phrase between two flourishes. */
+.section-rest {
+  position: relative;
+  padding: 96px 6vw 90px;
+  background:
+    radial-gradient(ellipse 70% 100% at 50% 50%, rgba(122, 26, 44, 0.04), transparent 70%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-4) 50%, var(--bg) 100%);
+  text-align: center;
+  overflow: hidden;
+}
+.section-rest-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.section-rest .vine-sprig:first-child { transform: scaleY(1); }
+.section-rest .vine-sprig:last-child  { transform: scaleX(-1); }
+.section-rest-phrase {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.2vw, 32px);
+  font-weight: 400;
+  color: var(--wine);
+  letter-spacing: 0.015em;
+  margin: 0;
+  max-width: 32ch;
+  text-align: center;
+}
+
+/* ── Wax seal embedded component ───────────────────────── */
+.wax-seal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.wax-seal svg {
+  filter: drop-shadow(0 4px 10px rgba(60, 12, 22, 0.35));
+}
+.wax-seal-label {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--wine);
+  letter-spacing: 0.04em;
+}
+
+/* ── Vine sprig — used in section rests and footer ───── */
+.vine-sprig {
+  display: block;
+  opacity: 0.85;
+}
+.fleuron {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ── Hero — wine-campaign composition ─────────────────── */
+.hero-text .hero-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.hero-text .display-xl {
+  position: relative;
+  text-shadow:
+    0 0 1px rgba(255, 245, 220, 0.9),
+    0 0 18px rgba(255, 222, 178, 0.55),
+    0 0 44px rgba(255, 196, 132, 0.4),
+    0 2px 1px rgba(42, 24, 16, 0.2);
+}
+/* The italic "of" — embossed wine swatch, heavier than the previous gradient text */
+.hero-text .display-xl em {
+  font-style: italic;
+  font-family: var(--serif);
+  font-weight: 400;
+  background: linear-gradient(180deg, #a52d3d 0%, var(--wine) 55%, #3a0810 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  letter-spacing: -0.01em;
+}
+
+/* Hero lede — larger, embossed cream chip for legibility */
+.cinema-sticky .hero-text .lede {
+  font-family: var(--serif);
+  font-size: clamp(17px, 1.4vw, 22px);
+  font-style: italic;
+  color: var(--ink);
+  text-shadow:
+    0 0 14px rgba(255, 248, 232, 0.95),
+    0 0 30px rgba(255, 248, 232, 0.7),
+    0 1px 0 rgba(122, 26, 44, 0.1);
+  margin-bottom: 4px;
+}
+.cinema-sticky .hero-text .lede::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 1px;
+  background: var(--wine);
+  opacity: 0.7;
+  margin: 22px auto 0;
+}
+
+.hero-side-meta {
+  position: absolute;
+  top: 50%;
+  font-family: var(--sans);
+  font-size: 9.5px;
+  letter-spacing: 0.48em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  writing-mode: vertical-rl;
+  pointer-events: auto;
+  text-shadow: 0 0 12px rgba(244, 236, 216, 0.95), 0 0 4px rgba(244, 236, 216, 0.9);
+}
+.hero-side-meta::before,
+.hero-side-meta::after {
+  content: "";
+  display: block;
+  width: 1px; height: 48px;
+  background: linear-gradient(180deg, transparent, var(--wine) 50%, transparent);
+  margin: 16px auto;
+  opacity: 0.85;
+}
+
+/* Premium scroll indicator — animated thin line + small label */
+.hero-scroll {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  font-weight: 500;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.hero-scroll .scroll-line {
+  width: 1px;
+  height: 56px;
+  background: linear-gradient(180deg, var(--ink-mute) 0%, transparent 100%);
+  position: relative;
+  overflow: hidden;
+}
+.hero-scroll .scroll-line::after {
+  content: "";
+  position: absolute;
+  left: 0; top: -50%;
+  width: 100%; height: 50%;
+  background: linear-gradient(180deg, transparent, var(--wine));
+  animation: scroll-drip 2.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+}
+@keyframes scroll-drip {
+  0%   { transform: translateY(0);    opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(220%); opacity: 0; }
+}
+
+/* Brand mark watermark in upper-left of cinema stage */
+.brand-mark-watermark {
+  position: absolute;
+  top: 11vh;
+  left: 4vw;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 400;
+  pointer-events: none;
+  z-index: 9;
+  text-shadow: 0 0 12px rgba(244, 236, 216, 0.85);
+}
+.brand-mark-watermark::before {
+  content: "";
+  display: inline-block;
+  width: 28px; height: 1px;
+  background: var(--wine);
+  vertical-align: middle;
+  margin-right: 14px;
+  opacity: 0.7;
+}
+
+/* ── Region cards — wine-label aesthetic ───────────── */
+.region-card.region-card-rich {
+  border-radius: 2px;
+  border: 1px solid rgba(122, 26, 44, 0.14);
+  overflow: hidden;
+  padding-top: 64px;
+}
+.region-card.region-card-rich::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 2;
+}
+.region-card.region-card-rich:hover::after { transform: scaleX(1); }
+/* "Region serial" — a label tag at the top, like the lot number on a wine */
+.region-card .region-num {
+  position: absolute;
+  top: 26px;
+  left: 32px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--wine);
+  letter-spacing: 0.02em;
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.region-card .region-num::before { content: "№ "; font-style: italic; color: var(--ink-mute); }
+.region-card .region-num::after {
+  content: "";
+  width: 26px; height: 1px;
+  background: var(--wine);
+  opacity: 0.45;
+  align-self: center;
+  margin-left: 4px;
+}
+.region-card .region-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(38px, 3.4vw, 52px);
+  line-height: 1;
+  margin: 0 0 14px;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.region-card .region-desc {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  max-width: 30ch;
+}
+.region-card .region-meta {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--ink-mute);
+  border-top: none;
+  padding-top: 22px;
+  margin-top: 28px;
+  position: relative;
+}
+.region-card .region-meta::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 36px; height: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+.region-card .region-arrow {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 24px;
+}
+
+/* ── Regions section — horizontal terroir strip below the cards ─── */
+.terroir-strip {
+  margin: 100px 0 0;
+  padding: 36px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(180deg, rgba(244, 236, 216, 0.4), transparent);
+  overflow: hidden;
+  position: relative;
+}
+.terroir-strip-track {
+  display: flex;
+  gap: 70px;
+  align-items: center;
+  white-space: nowrap;
+  animation: terroir-scroll 48s linear infinite;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 2.4vw, 32px);
+  color: var(--ink-dim);
+  letter-spacing: 0.04em;
+}
+.terroir-strip-track .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 70px;
+}
+.terroir-strip-track .item::after {
+  content: "✦";
+  font-style: normal;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0;
+}
+.terroir-strip-track .item:last-child::after { display: inline-flex; }
+@keyframes terroir-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Glass section — premium storytelling ─────────────── */
+.glass-section {
+  position: relative;
+}
+.glass-section .glass-sticky {
+  background: radial-gradient(ellipse 60% 80% at 50% 60%, rgba(255, 248, 225, 0.85), rgba(244, 236, 216, 1) 75%);
+}
+.glass-text {
+  max-width: 540px;
+}
+.glass-text .display-xl em {
+  background: linear-gradient(180deg, var(--wine-3) 0%, var(--wine) 70%, #3a0810 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Glass — bottom strip of export markets */
+.export-marquee {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 5vh;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+  border-top: 1px solid rgba(184, 148, 86, 0.25);
+  border-bottom: 1px solid rgba(184, 148, 86, 0.25);
+  padding: 14px 0;
+  background: rgba(244, 236, 216, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.export-marquee-track {
+  display: flex;
+  gap: 56px;
+  white-space: nowrap;
+  animation: marquee-pan 32s linear infinite;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.export-marquee-track .item { display: inline-flex; align-items: center; gap: 56px; }
+.export-marquee-track .item::after {
+  content: "·";
+  color: var(--wine);
+  font-size: 18px;
+}
+@keyframes marquee-pan {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Glass eyebrow — left side meta */
+.glass-side-meta {
+  position: absolute;
+  left: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.46em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  writing-mode: vertical-rl;
+  z-index: 5;
+}
+.glass-side-meta::before,
+.glass-side-meta::after {
+  content: "";
+  display: block;
+  width: 1px; height: 42px;
+  background: linear-gradient(180deg, transparent, var(--wine) 50%, transparent);
+  margin: 14px auto;
+}
+
+/* ── Wineries — wine-list aesthetic ─────────────────── */
+.winery-grid.is-curated {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: minmax(380px, auto);
+  gap: 28px;
+}
+.winery-card {
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  padding: 44px 36px 36px;
+  background: var(--bg-3);
+  border: 1px solid rgba(122, 26, 44, 0.1);
+}
+.winery-card::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0; right: 0;
+  height: 3px;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.winery-card:hover::after { transform: scaleX(1); }
+.winery-card:hover {
+  background: var(--bg-4);
+  transform: translateY(-3px);
+  box-shadow: 0 28px 50px -36px rgba(122, 26, 44, 0.35);
+}
+
+.winery-card .winery-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.winery-card .winery-mark::after {
+  content: "";
+  width: 40px; height: 1px;
+  background: var(--wine);
+  opacity: 0.5;
+}
+.winery-card .winery-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(28px, 2vw, 34px);
+  font-weight: 400;
+  line-height: 1.05;
+  margin: 0 0 8px;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.winery-card .winery-region {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.winery-card .winery-meta dt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  color: var(--ink-mute);
+  padding-top: 3px;
+}
+.winery-card .winery-meta dd {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-dim);
+  line-height: 1.45;
+}
+.winery-card .winery-link {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--wine);
+  border-top: 1px solid rgba(122, 26, 44, 0.18);
+  padding-top: 22px;
+  margin-top: auto;
+}
+.winery-card .winery-link::after {
+  content: " →";
+  font-style: italic;
+  transition: padding-left 0.3s ease;
+}
+.winery-card .winery-link:hover { color: var(--wine-3); }
+.winery-card:hover .winery-link::after { padding-left: 8px; }
+
+/* Featured Maker — banderole banner, not a SaaS badge */
+.winery-card.winery-card-featured {
+  grid-column: span 2;
+  background:
+    radial-gradient(ellipse 70% 50% at 92% 8%, rgba(184, 148, 86, 0.22), transparent 55%),
+    linear-gradient(180deg, var(--bg-3) 0%, var(--bg-4) 100%);
+  border: 1px solid rgba(122, 26, 44, 0.18);
+  padding: 60px 56px 48px;
+  position: relative;
+  isolation: isolate;
+}
+.winery-card-featured::before {
+  content: "Estate of the season";
+  position: absolute;
+  top: 30px;
+  right: 36px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: var(--wine);
+  padding: 8px 18px;
+  background: rgba(244, 236, 216, 0.9);
+  border-top: 1px solid var(--wine);
+  border-bottom: 1px solid var(--wine);
+  transform: rotate(-1.5deg);
+  transform-origin: right center;
+}
+.winery-card-featured .winery-name {
+  font-size: clamp(40px, 3.4vw, 56px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.winery-card-featured .winery-region { font-size: 11.5px; letter-spacing: 0.36em; }
+.winery-card-featured .winery-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 32px 40px; }
+.winery-card-featured .winery-meta > div { grid-template-columns: 90px 1fr; }
+.winery-card-featured .winery-meta dd { font-size: 18px; }
+
+/* Chip filters — wine list tags */
+.chip {
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  font-weight: 400;
+  padding: 8px 18px;
+  border: 1px solid rgba(122, 26, 44, 0.25);
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: -1;
+}
+.chip:hover { color: var(--bg-3); border-color: var(--wine); transform: translateY(-1px); }
+.chip:hover::before { transform: scaleX(1); }
+.chip-active {
+  color: var(--bg-3);
+  border-color: var(--wine);
+  background: var(--wine);
+}
+.chip-active::before { transform: scaleX(1); }
+
+/* ── Trade — refined composition ────────────────────── */
+.trade {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 220, 170, 0.35), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(122, 26, 44, 0.1), transparent 70%),
+    linear-gradient(180deg, var(--bg-4) 0%, var(--bg) 100%);
+}
+.trade-inner .eyebrow {
+  justify-content: center;
+}
+.trade-inner .display-xl em {
+  background: linear-gradient(180deg, var(--wine-3) 0%, var(--wine) 70%, #3a0810 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.cta-primary, .cta-outline, .cta-ghost {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  transition: color 0.3s ease, background 0.3s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease;
+}
+.cta-primary {
+  background: linear-gradient(180deg, var(--wine-2) 0%, var(--wine) 80%);
+  box-shadow: 0 14px 28px -16px rgba(122, 26, 44, 0.45);
+}
+.cta-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--wine) 0%, #3a0810 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.cta-primary > * { position: relative; z-index: 1; }
+.cta-primary:hover { transform: translateY(-2px); box-shadow: 0 22px 36px -16px rgba(122, 26, 44, 0.55); }
+.cta-primary:hover::before { opacity: 1; }
+.cta-outline:hover { transform: translateY(-2px); }
+.cta-ghost:hover { transform: translateY(-1px); }
+
+/* Trade stats — vintage poster numerals, italic serif label.
+   Looks like an estate's harvest plaque, not a pitch-deck KPI row. */
+.trade-stats.vintage-stats {
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  border-top: none;
+  border-bottom: none;
+  padding: 70px 0 50px;
+}
+.trade-stats.vintage-stats li {
+  text-align: center;
+  position: relative;
+  padding: 0 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.trade-stats.vintage-stats li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(122, 26, 44, 0.25) 30%, rgba(122, 26, 44, 0.25) 70%, transparent);
+}
+.trade-stats.vintage-stats .stat-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(54px, 6.5vw, 96px);
+  line-height: 0.95;
+  color: var(--wine);
+  background: none;
+  -webkit-text-fill-color: var(--wine);
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 0 rgba(244, 236, 216, 0.85);
+  margin-bottom: 4px;
+}
+.trade-stats.vintage-stats .stat-lbl {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: var(--ink-dim);
+  margin-top: 6px;
+  position: relative;
+  padding-top: 16px;
+}
+.trade-stats.vintage-stats .stat-lbl::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 24px; height: 1px;
+  background: var(--gold);
+  opacity: 0.6;
+}
+
+/* ── Footer — cellar / wine brand catalogue ────────── */
+.footer.cellar-footer {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(122, 26, 44, 0.07), transparent 60%),
+    linear-gradient(180deg, rgba(244, 236, 216, 0) 0%, rgba(237, 226, 196, 0.6) 35%, rgba(237, 226, 196, 0.85) 100%);
+  padding: 0;
+  margin-top: 120px;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+.cellar-footer-top {
+  display: flex;
+  justify-content: center;
+  padding: 70px 6vw 36px;
+  border-top: 1px solid rgba(122, 26, 44, 0.18);
+  position: relative;
+}
+.cellar-footer-top::before,
+.cellar-footer-top::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--wine), transparent);
+  opacity: 0.5;
+}
+.cellar-footer-top::before { left: 0; }
+.cellar-footer-top::after  { right: 0; }
+.cellar-footer-top .vine-sprig { opacity: 0.95; }
+
+.cellar-footer-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 2fr;
+  gap: 90px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 20px 6vw 70px;
+}
+.cellar-brand { padding-top: 6px; }
+.cellar-brand .wax-seal { margin-bottom: 28px; }
+.cellar-brand-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.012em;
+  margin: 0 0 22px;
+  color: var(--ink);
+}
+.cellar-brand-name em {
+  font-style: italic;
+  color: var(--wine);
+}
+.cellar-brand-tagline {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 38ch;
+  margin: 0 0 28px;
+}
+.cellar-brand-address {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  line-height: 1.9;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0;
+}
+.cellar-brand-email {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  letter-spacing: 0;
+  color: var(--wine);
+  text-transform: none;
+  border-bottom: 1px solid var(--wine);
+  padding-bottom: 1px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.cellar-brand-email:hover { color: var(--wine-3); border-color: var(--wine-3); }
+
+.cellar-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 56px;
+  padding-top: 12px;
+}
+.cellar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cellar-col-title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--wine);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(122, 26, 44, 0.22);
+}
+.cellar-col-title em { font-style: italic; color: var(--wine); }
+.cellar-col a {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--ink-dim);
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), padding-left 0.3s ease;
+  position: relative;
+  display: inline-block;
+  width: max-content;
+}
+.cellar-col a::before {
+  content: "›";
+  position: absolute;
+  left: -16px;
+  top: 0;
+  font-style: italic;
+  color: var(--wine);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateX(-4px);
+}
+.cellar-col a:hover {
+  color: var(--wine);
+  padding-left: 14px;
+}
+.cellar-col a:hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.cellar-fine {
+  margin-top: 30px;
+  padding: 32px 6vw 36px;
+  border-top: 1px solid rgba(122, 26, 44, 0.18);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.cellar-fine em {
+  font-family: var(--serif);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 13px;
+  color: var(--wine);
+}
+.cellar-fine-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.cellar-grape {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 2px;
+}
+.cellar-fine-right em { font-size: 14px; }
+.footer-inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  max-width: 1280px;
+  padding: 0 6vw;
+}
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.footer-brand .footer-mark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 28px;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  width: 52px; height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.05em;
+  background: rgba(255, 255, 255, 0.4);
+}
+.footer-brand-tagline {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink-dim);
+  text-transform: none;
+  letter-spacing: 0;
+  max-width: 28ch;
+  line-height: 1.5;
+}
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.footer-col-title {
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.footer-col a {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink-dim);
+  transition: color 0.25s ease, transform 0.25s ease;
+  display: inline-block;
+}
+.footer-col a:hover { color: var(--wine); transform: translateX(3px); }
+.footer-fine {
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 6vw;
+  padding-right: 6vw;
+  width: 100%;
+}
+.footer-system {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.footer-system::before {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #7ea05a;
+  box-shadow: 0 0 0 2px rgba(126, 160, 90, 0.25), 0 0 12px rgba(126, 160, 90, 0.5);
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.25); }
+}
+
+/* ── Nav — refined ────────────────────────────────── */
+.nav-scrolled {
+  background: rgba(244, 236, 216, 0.78);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-bottom-color: rgba(184, 148, 86, 0.18);
+  box-shadow: 0 12px 28px -22px rgba(60, 30, 20, 0.4);
+}
+.nav-links a {
+  position: relative;
+  padding: 4px 0;
+}
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-cta {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  letter-spacing: 0.26em;
+  padding: 12px 22px;
+}
+.nav-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: -1;
+}
+.nav-cta:hover::before { transform: scaleX(1); }
+.nav-cta:hover { color: var(--bg-3); }
+
+/* ── Mobile premium adjustments ─────────────────────── */
+@media (max-width: 900px) {
+  .chapter-divider { padding: 80px 4vw 64px; }
+  .chapter-divider .roman { font-size: clamp(54px, 12vw, 92px); }
+  .chapter-divider .roman::before,
+  .chapter-divider .roman::after { width: 48px; margin-right: 18px; margin-left: 18px; }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .footer-fine { flex-direction: column; gap: 16px; text-align: center; }
+  .winery-grid.is-curated { grid-template-columns: 1fr; }
+  .winery-card.winery-card-featured { grid-column: span 1; padding: 36px 28px; }
+  .winery-card-featured .winery-name { font-size: 32px; }
+  .winery-card-featured .winery-meta { grid-template-columns: 1fr; gap: 16px; }
+  .terroir-strip { margin-top: 60px; padding: 24px 0; }
+  .terroir-strip-track { font-size: 18px; gap: 48px; }
+  .terroir-strip-track .item { gap: 48px; }
+  .glass-side-meta { display: none; }
+  .export-marquee { display: none; }
+  .brand-mark-watermark { display: none; }
+  .trade-stats li + li::before { display: none; }
+  .trade-stats {
+    border-left: none !important;
+    border-right: none !important;
+  }
+}
+
+/* ── Glass-pour variant — used inside the GlassStage section ───── */
+.scrub-video-frame.glass-scrub .scrub-video {
+  object-position: 50% 55%;
+}
+.scrub-video-frame.glass-scrub .scrub-video-mask {
+  background:
+    /* Right-side text legibility fade — softens vineyard behind .glass-text */
+    linear-gradient(90deg,
+      transparent 50%,
+      rgba(244, 236, 216, 0.10) 65%,
+      rgba(244, 236, 216, 0.32) 82%,
+      rgba(244, 236, 216, 0.55) 100%),
+    /* Subtle bottom fade so the marquee band reads cleanly + softens edge */
+    linear-gradient(180deg,
+      transparent 70%,
+      rgba(244, 236, 216, 0.18) 88%,
+      rgba(244, 236, 216, 0.42) 100%);
+}
+.scrub-video-frame.glass-scrub .scrub-video-vignette {
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 50%, transparent 55%, rgba(42, 24, 16, 0.18) 95%);
+  opacity: 0.5;
+}
+
+/* GlassStage layered overlays should still pull above the video */
+.glass-section .scrub-video-frame { z-index: 0; }
+.glass-section .glass-side-meta,
+.glass-section .glass-text,
+.glass-section .export-marquee,
+.glass-section .depth-haze-top,
+.glass-section .cinema-vignette { z-index: 5; }
+.glass-section .glass-text {
+  text-shadow:
+    0 0 14px rgba(255, 248, 232, 0.85),
+    0 1px 1px rgba(122, 26, 44, 0.12);
+}
+.glass-section .glass-text .display-xl {
+  text-shadow:
+    0 0 1px rgba(255, 245, 220, 0.85),
+    0 0 14px rgba(255, 222, 178, 0.45),
+    0 0 36px rgba(255, 200, 140, 0.3),
+    0 2px 1px rgba(42, 24, 16, 0.18);
+}
+
+@media (max-width: 900px) {
+  .scrub-video-frame.glass-scrub .scrub-video { object-position: 50% 50%; }
+  .scrub-video-frame.glass-scrub .scrub-video-mask {
+    background:
+      linear-gradient(180deg,
+        transparent 50%,
+        rgba(244, 236, 216, 0.4) 75%,
+        rgba(244, 236, 216, 0.85) 95%,
+        rgba(244, 236, 216, 1) 100%);
+  }
+}
+
+@media (max-width: 900px) {
+  .scrub-video { object-position: 32% 32%; }
+  /* Pull the radial impact mask more toward center on narrow viewports so
+     the stream still fades cleanly when the video is heavily cover-cropped. */
+  .scrub-video-mask {
+    background:
+      radial-gradient(ellipse 100% 75% at 65% 100%,
+        rgba(244, 236, 216, 1) 0%,
+        rgba(244, 236, 216, 1) 22%,
+        rgba(244, 236, 216, 0.92) 38%,
+        rgba(244, 236, 216, 0.62) 55%,
+        rgba(244, 236, 216, 0.25) 72%,
+        rgba(244, 236, 216, 0) 90%),
+      linear-gradient(180deg,
+        rgba(244, 236, 216, 0) 35%,
+        rgba(244, 236, 216, 0.2) 52%,
+        rgba(244, 236, 216, 0.55) 68%,
+        rgba(244, 236, 216, 0.92) 85%,
+        rgba(244, 236, 216, 1) 100%);
+  }
+}
+@media (max-width: 700px) {
+  .scrub-video { object-position: 38% 30%; }
+  .scrub-video-vignette { opacity: 0.5; }
+  /* On mobile, story-text moves out of the bottom-right caption zone and
+     centers under the video so it doesn't crowd the wine pour at thumb width. */
+  .story-text, .flow-text {
+    right: 4vw; left: 4vw;
+    bottom: 6vh; top: auto;
+    max-width: none;
+    text-align: center;
+  }
+  .story-text .lede, .flow-text .lede { text-align: center; margin: 18px auto 0; max-width: none; }
+  .story-text .eyebrow, .flow-text .eyebrow { justify-content: center; }
+  .story-text .eyebrow::before, .flow-text .eyebrow::before {
+    content: ""; width: 28px; height: 1px; background: var(--wine); opacity: 0.6; display: block;
+  }
+}
+
+/* Cinema text overlays */
+.cinema-text {
+  position: absolute;
+  z-index: 8;
+  transition: opacity 0.4s ease;
+  will-change: opacity;
+}
+
+/* Hero is split: eyebrow+headline TOP, subhead+CTAs BOTTOM,
+   bottle uncovered in the middle */
+.hero-text {
+  left: 0; right: 0;
+  top: 0; bottom: 0;
+  pointer-events: none;
+}
+.hero-top {
+  position: absolute;
+  top: 9vh;
+  left: 0; right: 0;
+  text-align: center;
+  padding: 0 6vw;
+  pointer-events: auto;
+}
+.hero-bottom {
+  position: absolute;
+  bottom: 5vh;
+  left: 0; right: 0;
+  text-align: center;
+  padding: 0 6vw;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.hero-bottom .lede { margin: 0; font-size: clamp(15px, 1.2vw, 19px); max-width: none; width: 100%; text-align: center; }
+.hero-side-meta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  writing-mode: vertical-rl;
+  pointer-events: auto;
+}
+.hero-side-meta.left { left: 40px; }
+.hero-side-meta.right { right: 40px; transform: translateY(-50%) rotate(180deg); }
+.hero-side-meta::before, .hero-side-meta::after {
+  content: "";
+  display: block;
+  width: 1px; height: 36px;
+  background: var(--ink-mute);
+  margin: 14px auto;
+}
+
+.hero-text .display-xl {
+  font-size: clamp(48px, 6.4vw, 104px);
+  line-height: 0.95;
+}
+
+.cta-row {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.cta-primary,
+.cta-ghost,
+.cta-outline {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 16px 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.25s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.cta-primary {
+  background: var(--wine);
+  color: var(--bg-3);
+}
+.cta-primary:hover { background: var(--ink); }
+.cta-ghost {
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink-mute);
+  padding: 16px 4px;
+}
+.cta-ghost:hover { color: var(--wine); border-bottom-color: var(--wine); }
+.cta-outline {
+  border: 1px solid var(--wine);
+  color: var(--wine);
+}
+.cta-outline:hover { background: var(--wine); color: var(--bg-3); }
+.cta-lg { padding: 22px 36px; font-size: 13px; }
+
+.hero-scroll { display: none; }
+
+/* Story / flow text — positioned in the lower-right "film caption" zone
+   where the gradient mask is fully opaque cream. The text sits on a clean
+   warm-ivory backdrop, like an editorial film subtitle, while the wine pour
+   descends visibly above and to the left of the text block. */
+.story-text {
+  right: 6vw;
+  bottom: 8vh;
+  top: auto;
+  transform: none;
+  max-width: 520px;
+  text-align: right;
+}
+.story-text .lede { text-align: right; max-width: 44ch; margin-left: auto; }
+.story-text .eyebrow { justify-content: flex-end; }
+.story-text .eyebrow::before { display: none; }
+.story-text .eyebrow::after { content: ""; width: 28px; height: 1px; background: var(--wine); opacity: 0.6; }
+.flow-text {
+  right: 6vw;
+  bottom: 8vh;
+  top: auto;
+  transform: none;
+  max-width: 520px;
+  text-align: right;
+}
+.flow-text .lede { text-align: right; max-width: 44ch; margin-left: auto; }
+.flow-text .eyebrow { justify-content: flex-end; }
+.flow-text .eyebrow::before { display: none; }
+.flow-text .eyebrow::after { content: ""; width: 28px; height: 1px; background: var(--wine); opacity: 0.6; }
+.story-text .display-l,
+.flow-text .display-l { font-size: clamp(34px, 4.4vw, 68px); }
+
+/* Phase progress */
+.phase-dots {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 9;
+}
+.phase-dots span {
+  width: 26px; height: 1px;
+  background: rgba(42, 24, 16, 0.18);
+  transition: background 0.3s, height 0.3s;
+}
+.phase-dots span.active {
+  background: var(--wine);
+  height: 2px;
+}
+
+/* ====================================================
+   REGIONS
+   ==================================================== */
+.regions {
+  position: relative;
+  padding: 180px 6vw 200px;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 50%, var(--bg) 100%);
+  z-index: 2;
+}
+.regions::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 1px);
+  top: -120px;
+  width: 2px;
+  height: 220px;
+  background: linear-gradient(to bottom, transparent, var(--wine), transparent);
+  opacity: 0.7;
+}
+.regions-head {
+  max-width: 1280px;
+  margin: 0 auto 90px;
+  text-align: center;
+}
+.regions-head .eyebrow { justify-content: center; }
+.regions-head .eyebrow::before { display: none; }
+.regions-head .eyebrow::after {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--wine);
+  opacity: 0.6;
+}
+.regions-head .lede { margin-left: auto; margin-right: auto; }
+
+.regions-grid {
+  max-width: 1480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.region-card {
+  position: relative;
+  padding: 56px 44px 52px;
+  background: var(--bg-3);
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.5s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+.region-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 30% 30%, var(--accent), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.region-card:hover::before { opacity: 0.15; }
+.region-card:hover { background: var(--bg-4); }
+
+.region-num {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold-dim);
+  letter-spacing: 0.05em;
+  margin-bottom: 36px;
+}
+.region-motif-wrap {
+  height: 86px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-end;
+}
+.region-motif { width: 120px; height: 80px; opacity: 0.85; transition: opacity 0.4s; }
+.region-card:hover .region-motif { opacity: 1; }
+
+.region-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 38px;
+  line-height: 1;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.region-desc {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 17px;
+  margin: 0 0 auto;
+  max-width: 32ch;
+}
+.region-meta {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+.region-arrow {
+  position: absolute;
+  right: 36px;
+  bottom: 36px;
+  font-size: 22px;
+  color: var(--wine);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.region-card:hover .region-arrow { opacity: 1; transform: translateX(0); }
+
+@media (max-width: 1100px) {
+  .regions-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  .regions-grid { grid-template-columns: 1fr; }
+  .regions { padding: 100px 4vw 120px; }
+}
+
+/* ====================================================
+   GLASS STAGE
+   ==================================================== */
+.glass-section {
+  position: relative;
+  height: 320vh;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-4) 50%, var(--bg-2) 100%);
+}
+.glass-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+.bg-spot {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle 32vw at 50% 45%, rgba(184, 148, 86, 0.20), transparent 70%),
+    radial-gradient(circle 50vw at 50% 60%, rgba(255, 252, 240, 0.4), transparent 70%);
+  pointer-events: none; z-index: 1;
+}
+.glass-stream-layer {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 700px;
+  height: 70vh;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+.glass-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  will-change: transform, opacity;
+}
+.glass-wrap { filter: drop-shadow(0 30px 60px rgba(60, 30, 20, 0.28)); }
+.splash {
+  position: absolute;
+  left: 50%;
+  top: 96px;
+  width: 80px; height: 6px;
+  margin-left: -40px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(165, 45, 60, 0.5), transparent 70%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+.glass-text {
+  position: absolute;
+  right: 8vw;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  max-width: 540px;
+}
+.glass-text .lede { max-width: 44ch; }
+
+@media (max-width: 900px) {
+  .glass-text { right: 4vw; left: 4vw; top: 12vh; max-width: none; transform: none; }
+  .glass-center { transform: translate(-50%, 12vh) !important; top: 50% !important; }
+}
+
+/* ====================================================
+   WINERIES
+   ==================================================== */
+.wineries {
+  padding: 200px 6vw 180px;
+  background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
+  position: relative;
+}
+.section-head {
+  max-width: 1280px;
+  margin: 0 auto 80px;
+}
+.winery-filters {
+  margin-top: 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.chip {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  font-weight: 400;
+  padding: 7px 18px;
+  border: 1px solid rgba(122, 26, 44, 0.28);
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.3s ease, background 0.35s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+  border-radius: 0;
+}
+.chip:hover {
+  color: var(--bg-3);
+  border-color: var(--wine);
+  background: var(--wine);
+  transform: translateY(-1px);
+}
+.chip-active {
+  background: var(--wine);
+  color: var(--bg-3);
+  border-color: var(--wine);
+}
+.chip-divider {
+  width: 1px; height: 20px;
+  background: rgba(122, 26, 44, 0.3);
+  margin: 0 10px;
+}
+
+.winery-grid {
+  max-width: 1480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.winery-card {
+  position: relative;
+  padding: 38px 36px 34px;
+  background: var(--bg-3);
+  border: 1px solid var(--rule-soft);
+  transition: transform 0.4s ease, border-color 0.4s, background 0.4s, box-shadow 0.4s;
+  display: flex;
+  flex-direction: column;
+  min-height: 340px;
+}
+.winery-card:hover {
+  border-color: var(--wine);
+  background: var(--bg-4);
+  transform: translateY(-4px);
+  box-shadow: 0 22px 40px -28px rgba(60, 30, 20, 0.5);
+}
+.winery-mark { margin-bottom: 24px; }
+.winery-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.1;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.winery-region {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--wine);
+  margin-bottom: 26px;
+}
+.winery-meta {
+  margin: 0 0 24px;
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+.winery-meta > div {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 16px;
+  font-size: 13px;
+}
+.winery-meta dt {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding-top: 3px;
+}
+.winery-meta dd {
+  margin: 0;
+  color: var(--ink-dim);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.4;
+}
+.winery-link {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule-soft);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+}
+.winery-link:hover { color: var(--ink); }
+
+@media (max-width: 1100px) { .winery-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .winery-grid { grid-template-columns: 1fr; } .wineries { padding: 100px 4vw 120px; } }
+
+/* ====================================================
+   TRADE CTA + FOOTER
+   ==================================================== */
+.trade {
+  position: relative;
+  background: var(--bg-4);
+  padding: 200px 6vw 0;
+  overflow: hidden;
+}
+.trade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 60% at 50% 40%, rgba(184, 148, 86, 0.15), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(122, 18, 36, 0.05), transparent 70%);
+  pointer-events: none;
+}
+.trade-inner {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+.trade-inner .eyebrow { justify-content: center; }
+.trade-inner .eyebrow::before { display: none; }
+.trade-inner .eyebrow::after {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--wine);
+  opacity: 0.6;
+}
+.trade-ctas {
+  margin: 60px 0 100px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.trade-stats {
+  list-style: none;
+  padding: 60px 0;
+  margin: 0 0 80px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.trade-stats li { display: flex; flex-direction: column; gap: 8px; }
+.stat-num {
+  font-family: var(--serif);
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1;
+  color: var(--wine);
+  font-weight: 400;
+}
+.stat-lbl {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+@media (max-width: 700px) {
+  .trade-stats { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+}
+
+/* Footer */
+.footer {
+  position: relative;
+  padding: 60px 0 36px;
+  border-top: 1px solid var(--rule);
+  margin-top: 80px;
+}
+.footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.footer-brand { display: flex; align-items: center; gap: 14px; font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-dim); }
+.footer-links { display: flex; gap: 28px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-dim); }
+.footer-links a:hover { color: var(--wine); }
+.footer-fine { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute); width: 100%; text-align: center; padding-top: 30px; border-top: 1px solid var(--rule); margin-top: 30px; }
+
+/* ====================================================
+   MOBILE OVERALL ADJUSTMENTS
+   ==================================================== */
+@media (max-width: 900px) {
+  .cinema-section { height: 360vh; }
+  .glass-section { height: 240vh; }
+  .hero-text .lede { font-size: 17px; }
+  .story-text, .flow-text {
+    right: 4vw; left: 4vw;
+    top: auto; bottom: 14vh; transform: none;
+    max-width: none;
+  }
+  .cinema-bottle { transform: translate(-50%, -50%) scale(0.7) !important; }
+}
+@media (max-width: 600px) {
+  .nav-cta { display: none; }
+  .nav-name { font-size: 9px; letter-spacing: 0.24em; }
+  .hero-scroll { display: none; }
+  .display-xl { font-size: clamp(44px, 13vw, 80px); }
+}
+
+/* ============================================================================
+   CINEMATIC ATMOSPHERE — appended layers for premium realism
+   ============================================================================ */
+
+/* Re-tighten the pinned scroll runways. Previous 500vh / 320vh left dead
+   space at the tail. New phase mapping in app.jsx targets these heights. */
+.cinema-section { height: 380vh; }
+.glass-section { height: 260vh; }
+
+/* Bottle-surface — stone slab placed beneath the bottle in cinema-sticky */
+.cinema-surface {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 40vh;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cinema-surface .bottle-surface {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+}
+/* Surface fade at top for atmospheric blend into vineyard */
+.cinema-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(244,236,216,0.55) 12%, rgba(244,236,216,0) 38%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── 01 Film grain ───────────────────────────────────────── */
+.film-grain {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.34  0 0 0 0 0.22  0 0 0 0 0.12  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* ── 02 Cinema vignette ──────────────────────────────────── */
+.cinema-vignette {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.65;
+  z-index: 7;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(42, 24, 16, 0) 38%,
+    rgba(42, 24, 16, 0.18) 70%,
+    rgba(28, 14, 6, 0.55) 100%
+  );
+}
+
+/* ── 03 Lens flare ───────────────────────────────────────── */
+.lens-flare {
+  position: absolute;
+  top: 4%;
+  right: 2%;
+  width: 460px;
+  height: 460px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  z-index: 6;
+  animation: cine-flare-pulse 8s ease-in-out infinite, cine-lens-shimmer 10s ease-in-out infinite;
+  background:
+    linear-gradient(90deg,
+      rgba(255, 220, 170, 0) 0%,
+      rgba(255, 220, 170, 0.18) 45%,
+      rgba(255, 240, 210, 0.32) 50%,
+      rgba(255, 220, 170, 0.18) 55%,
+      rgba(255, 220, 170, 0) 100%),
+    radial-gradient(circle at 60% 45%,
+      rgba(255, 200, 140, 0.4) 0%,
+      rgba(255, 180, 110, 0.16) 18%,
+      rgba(255, 180, 110, 0) 38%),
+    radial-gradient(circle at 30% 70%,
+      rgba(255, 230, 180, 0.2) 0%,
+      rgba(255, 230, 180, 0) 30%),
+    radial-gradient(circle at 70% 35%,
+      rgba(255, 245, 220, 0.8) 0%,
+      rgba(255, 210, 150, 0.45) 8%,
+      rgba(255, 180, 110, 0.2) 18%,
+      rgba(255, 180, 110, 0) 40%);
+}
+
+/* ── 04 God rays ─────────────────────────────────────────── */
+.god-rays {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.18;
+  z-index: 5;
+}
+.god-rays::before {
+  content: "";
+  position: absolute;
+  top: -40%; left: -40%;
+  width: 180%; height: 180%;
+  background: repeating-linear-gradient(
+    115deg,
+    rgba(255, 235, 200, 0) 0px,
+    rgba(255, 235, 200, 0) 40px,
+    rgba(255, 230, 190, 0.18) 60px,
+    rgba(255, 230, 190, 0.30) 70px,
+    rgba(255, 230, 190, 0.18) 80px,
+    rgba(255, 235, 200, 0) 110px
+  );
+  -webkit-mask-image: radial-gradient(ellipse at 78% 14%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0) 70%);
+          mask-image: radial-gradient(ellipse at 78% 14%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0) 70%);
+  transform-origin: 78% 14%;
+  animation: cine-godray-drift 18s ease-in-out infinite;
+  filter: blur(2px);
+}
+
+/* ── 05 Depth haze top / bottom ──────────────────────────── */
+.depth-haze-top,
+.depth-haze-bottom {
+  position: absolute; left: 0; right: 0;
+  height: 200px;
+  pointer-events: none;
+  z-index: 4;
+  animation: cine-haze-shimmer 12s ease-in-out infinite;
+}
+.depth-haze-top {
+  top: 0;
+  background: linear-gradient(180deg,
+    rgba(251, 246, 232, 0.85) 0%,
+    rgba(244, 236, 216, 0.55) 40%,
+    rgba(244, 236, 216, 0) 100%);
+}
+.depth-haze-bottom {
+  bottom: 0;
+  background: linear-gradient(180deg,
+    rgba(42, 24, 16, 0) 0%,
+    rgba(60, 36, 22, 0.18) 60%,
+    rgba(42, 24, 16, 0.45) 100%);
+}
+
+/* ── 06 Scene fade edges ─────────────────────────────────── */
+.scene-fade-edge { position: relative; }
+.scene-fade-edge::before,
+.scene-fade-edge::after {
+  content: "";
+  position: absolute; left: 0; right: 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: 3;
+}
+.scene-fade-edge::before {
+  top: 0;
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(244,236,216,0.6) 50%, rgba(244,236,216,0) 100%);
+}
+.scene-fade-edge::after {
+  bottom: 0;
+  background: linear-gradient(0deg, var(--bg) 0%, rgba(244,236,216,0.6) 50%, rgba(244,236,216,0) 100%);
+}
+
+/* ── 07 Cinematic color grade ────────────────────────────── */
+.cinematic-grade {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 210, 160, 0.05) 0%,
+      rgba(255, 210, 160, 0) 35%,
+      rgba(20, 40, 60, 0) 65%,
+      rgba(20, 50, 70, 0.045) 100%),
+    radial-gradient(ellipse at 50% 50%,
+      rgba(255, 220, 180, 0.03) 0%,
+      rgba(255, 220, 180, 0) 70%);
+  mix-blend-mode: overlay;
+}
+
+/* ── 08 Dust motes ───────────────────────────────────────── */
+.dust-motes {
+  position: absolute;
+  inset: -10% 0 0 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.45;
+  z-index: 5;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(255,235,200,0.9) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 78% 15%, rgba(255,230,190,0.7) 0.5px, transparent 1.2px),
+    radial-gradient(circle at 42% 65%, rgba(255,240,210,0.85) 0.7px, transparent 1.6px),
+    radial-gradient(circle at 88% 78%, rgba(255,225,180,0.6) 0.5px, transparent 1.2px),
+    radial-gradient(circle at 24% 88%, rgba(255,235,200,0.7) 0.6px, transparent 1.3px),
+    radial-gradient(circle at 60% 38%, rgba(255,240,210,0.55) 0.4px, transparent 1.1px),
+    radial-gradient(circle at 8% 55%, rgba(255,230,190,0.5) 0.5px, transparent 1.2px),
+    radial-gradient(circle at 95% 45%, rgba(255,235,200,0.65) 0.5px, transparent 1.2px);
+  background-size: 420px 420px;
+  background-repeat: repeat;
+  animation: cine-mote-drift 30s linear infinite;
+}
+
+/* ── 09 Hero contact glow ────────────────────────────────── */
+.hero-contact-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  width: 56vw;
+  height: 14vh;
+  transform: translateX(-50%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.45;
+  z-index: 3;
+  background: radial-gradient(ellipse at center,
+    rgba(255, 215, 160, 0.85) 0%,
+    rgba(255, 190, 130, 0.4) 20%,
+    rgba(184, 148, 86, 0.18) 45%,
+    rgba(184, 148, 86, 0) 70%);
+  filter: blur(20px);
+}
+
+/* ── 10 Scroll pin hint ──────────────────────────────────── */
+.scroll-pin-hint {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(184,148,86,0.08) 0%, rgba(184,148,86,0.18) 100%);
+  overflow: hidden;
+}
+.scroll-pin-hint::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--wine-2) 100%);
+  transform: scaleY(var(--scroll-p, 0));
+  transform-origin: top center;
+  transition: transform 0.08s linear;
+  box-shadow: 0 0 12px rgba(184, 148, 86, 0.45);
+}
+
+/* ── 11 Text light shaft ─────────────────────────────────── */
+.text-light-shaft {
+  text-shadow:
+    0 0 1px rgba(255, 240, 210, 0.6),
+    0 0 12px rgba(255, 220, 170, 0.35),
+    0 0 28px rgba(255, 200, 140, 0.22),
+    0 0 60px rgba(184, 148, 86, 0.18),
+    0 2px 0 rgba(42, 24, 16, 0.06);
+}
+
+/* ── 12 Reveal up ─────────────────────────────────────────── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(8px);
+  transition:
+    opacity 1.2s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1),
+    filter 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform, filter;
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+.reveal-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* ── 13 Reveal text mask ─────────────────────────────────── */
+.reveal-text-mask .word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.05;
+  padding-bottom: 0.06em;
+}
+.reveal-text-mask .word-inner {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 1.4s cubic-bezier(0.7, 0, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 80ms);
+  will-change: transform;
+}
+.reveal-text-mask.is-visible .word-inner {
+  transform: translateY(0);
+}
+
+/* ── 16a Region card RICH (motif-driven) ─────────────────── */
+.region-card.region-card-rich {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 120% 80% at 80% 0%, var(--accent), transparent 55%),
+    linear-gradient(165deg, var(--bg-3) 0%, var(--bg-4) 50%, var(--bg-2) 100%);
+  background-blend-mode: multiply, normal;
+  overflow: hidden;
+  transition: background 0.5s ease, transform 0.5s ease, box-shadow 0.5s ease;
+}
+.region-card.region-card-rich::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 30% 30%, var(--accent), transparent 65%);
+  opacity: 0.12;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.region-card.region-card-rich:hover {
+  background:
+    radial-gradient(ellipse 130% 90% at 80% 0%, var(--accent), transparent 50%),
+    linear-gradient(165deg, var(--bg-4) 0%, var(--bg-3) 50%, var(--bg-2) 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px -40px rgba(60, 30, 20, 0.55);
+}
+.region-card.region-card-rich:hover::before { opacity: 0.22; }
+.region-card.region-card-rich > * { position: relative; z-index: 1; }
+
+/* Watermark — large faint motif behind the content */
+.region-watermark {
+  position: absolute;
+  top: 50%;
+  right: -20%;
+  transform: translateY(-50%) scale(3.2);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.6s ease;
+}
+.region-watermark svg { width: 240px; height: auto; }
+.region-card.region-card-rich:hover .region-watermark {
+  transform: translateY(-50%) scale(3.4) translateX(-12px);
+  opacity: 0.14;
+}
+
+/* ── 16b Region card photo (drop-in, optional) ───────────── */
+.region-card.region-card-photo {
+  background: transparent;
+  isolation: isolate;
+  color: #fbf6e8;
+}
+.region-card.region-card-photo .region-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.85) brightness(0.7);
+  transform: scale(1.02);
+  transition: transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              filter 1.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 0;
+}
+.region-card.region-card-photo .region-photo::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(42,24,16,0.15) 0%, rgba(42,24,16,0.45) 55%, rgba(42,24,16,0.75) 100%),
+    radial-gradient(ellipse at 30% 30%, rgba(255,220,170,0.18), transparent 65%);
+}
+.region-card.region-card-photo:hover .region-photo {
+  transform: scale(1.06);
+  filter: saturate(1.0) brightness(0.8);
+}
+.region-card.region-card-photo > * { position: relative; z-index: 1; }
+.region-card.region-card-photo .region-num { color: rgba(245, 220, 168, 0.85); }
+.region-card.region-card-photo .region-name { color: #fbf6e8; }
+.region-card.region-card-photo .region-desc { color: rgba(251, 246, 232, 0.85); }
+.region-card.region-card-photo .region-meta {
+  color: rgba(251, 246, 232, 0.7);
+  border-top-color: rgba(251, 246, 232, 0.22);
+}
+.region-card.region-card-photo .region-arrow { color: var(--gold); }
+.region-card.region-card-photo .region-motif {
+  filter: brightness(2) drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+  opacity: 0.95;
+}
+.region-card.region-card-photo:hover { background: transparent; }
+.region-card.region-card-photo::before { display: none; }
+
+/* ── 19 Keyframes ────────────────────────────────────────── */
+@keyframes cine-godray-drift {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  50%  { transform: translate(-6px, -6px) rotate(0.4deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+@keyframes cine-mote-drift {
+  0%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; opacity: 0.3; }
+  50%  { background-position: 4px -20px, -3px -22px, 5px -18px, -4px -24px, 3px -20px, -2px -22px, 4px -18px, -3px -24px; opacity: 0.55; }
+  100% { background-position: 0 -40px, 0 -42px, 0 -38px, 0 -44px, 0 -40px, 0 -42px, 0 -38px, 0 -44px; opacity: 0.3; }
+}
+@keyframes cine-flare-pulse {
+  0%   { opacity: 0.5; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0.5; }
+}
+@keyframes cine-haze-shimmer {
+  0%   { opacity: 0.45; }
+  50%  { opacity: 0.6; }
+  100% { opacity: 0.45; }
+}
+@keyframes cine-lens-shimmer {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ── Winery / trade refinements ──────────────────────────── */
+.winery-card {
+  background:
+    linear-gradient(180deg, var(--bg-3) 0%, var(--bg-4) 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 14px 30px -28px rgba(60,30,20,0.3);
+}
+.winery-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 88% 8%, rgba(184,148,86,0.18), transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 0;
+}
+.winery-card:hover::before { opacity: 1; }
+.winery-card > * { position: relative; z-index: 1; }
+
+.trade::before {
+  background:
+    radial-gradient(ellipse 60% 70% at 50% 0%, rgba(255,220,170,0.32), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 50% 40%, rgba(184, 148, 86, 0.18), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(122, 18, 36, 0.06), transparent 70%);
+}
+
+.stat-num {
+  background: linear-gradient(180deg, var(--wine-3) 0%, var(--wine) 60%, #3a0810 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Phase dots upgraded look ────────────────────────────── */
+.phase-dots {
+  background: rgba(255,250,235,0.4);
+  padding: 8px 14px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 14px -10px rgba(60,30,20,0.45);
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .god-rays::before,
+  .dust-motes,
+  .lens-flare,
+  .depth-haze-top,
+  .depth-haze-bottom {
+    animation: none !important;
+  }
+  .reveal-up,
+  .reveal-text-mask .word-inner,
+  .region-card.region-card-photo .region-photo {
+    transition: none !important;
+  }
+  .reveal-up { opacity: 1; transform: none; filter: none; }
+  .reveal-text-mask .word-inner { transform: none; }
+}
+
+/* ── Mobile performance trims ────────────────────────────── */
+@media (max-width: 700px) {
+  .god-rays,
+  .lens-flare,
+  .dust-motes {
+    display: none !important;
+  }
+  .film-grain {
+    opacity: 0.05;
+    background-size: 160px 160px;
+  }
+  .cinematic-grade { opacity: 0.6; }
+  .hero-contact-glow { width: 92vw; height: 14vh; opacity: 0.4; }
+  .depth-haze-top,
+  .depth-haze-bottom { height: 120px; animation: none; }
+  .cinema-surface { height: 32vh; }
+}
+
+/* ============================================================================
+   WINE-MAGAZINE FINAL OVERRIDES — these come last so they always win the
+   cascade over earlier passes' definitions.
+   ============================================================================ */
+
+/* ── Winery card: italic serif wine label feel ───── */
+.winery-card {
+  position: relative;
+  padding: 44px 36px 36px;
+  background: var(--bg-3);
+  border: 1px solid rgba(122, 26, 44, 0.1);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  overflow: hidden;
+  transition: transform 0.4s ease, border-color 0.4s, background 0.4s, box-shadow 0.5s ease;
+}
+.winery-card:hover {
+  border-color: rgba(122, 26, 44, 0.32);
+  background: var(--bg-4);
+  transform: translateY(-3px);
+  box-shadow: 0 28px 50px -36px rgba(122, 26, 44, 0.32);
+}
+.winery-card::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0; right: 0;
+  height: 3px;
+  background: var(--wine);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.winery-card:hover::after { transform: scaleX(1); }
+.winery-mark {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.winery-mark::after {
+  content: "";
+  width: 40px; height: 1px;
+  background: var(--wine);
+  opacity: 0.5;
+}
+.winery-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 2vw, 34px);
+  line-height: 1.05;
+  margin: 0 0 8px;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.winery-region {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--wine);
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.winery-meta dt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-transform: lowercase !important;
+  color: var(--ink-mute);
+  padding-top: 3px;
+  font-weight: 400;
+}
+.winery-meta dd {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-dim);
+  line-height: 1.45;
+  margin: 0;
+}
+.winery-link {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-transform: none !important;
+  color: var(--wine);
+  border-top: 1px solid rgba(122, 26, 44, 0.18) !important;
+  padding-top: 22px;
+  margin-top: auto;
+  font-weight: 400;
+}
+.winery-link:hover { color: var(--wine-3); }
+
+/* Featured Maker — banderole banner */
+.winery-card.winery-card-featured {
+  grid-column: span 2;
+  background:
+    radial-gradient(ellipse 70% 50% at 92% 8%, rgba(184, 148, 86, 0.22), transparent 55%),
+    linear-gradient(180deg, var(--bg-3) 0%, var(--bg-4) 100%);
+  border: 1px solid rgba(122, 26, 44, 0.22);
+  padding: 60px 56px 48px;
+  position: relative;
+  isolation: isolate;
+}
+.winery-card-featured::before {
+  content: "Estate of the season";
+  position: absolute;
+  top: 30px;
+  right: 36px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: var(--wine);
+  padding: 8px 18px;
+  background: rgba(244, 236, 216, 0.92);
+  border-top: 1px solid var(--wine);
+  border-bottom: 1px solid var(--wine);
+  transform: rotate(-1.5deg);
+  transform-origin: right center;
+  text-transform: none;
+}
+.winery-card-featured::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 90% 0%, rgba(184, 148, 86, 0.16), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+  transform: none;
+}
+.winery-card-featured .winery-name {
+  font-size: clamp(40px, 3.4vw, 54px);
+  letter-spacing: -0.02em;
+}
+.winery-card-featured .winery-region { font-size: 11.5px; letter-spacing: 0.36em; }
+.winery-card-featured .winery-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 40px; }
+.winery-card-featured .winery-meta > div { grid-template-columns: 90px 1fr; }
+.winery-card-featured .winery-meta dd { font-size: 17px; }
+
+/* ── Region cards — wine-label tag styling ───── */
+.region-card.region-card-rich {
+  border-radius: 2px;
+  border: 1px solid rgba(122, 26, 44, 0.14);
+  overflow: hidden;
+  padding: 64px 44px 48px;
+}
+.region-card .region-num {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--wine);
+  letter-spacing: 0.02em;
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.region-card .region-num::before { content: "No "; font-style: italic; color: var(--ink-mute); }
+.region-card .region-num::after {
+  content: "";
+  width: 26px; height: 1px;
+  background: var(--wine);
+  opacity: 0.45;
+  align-self: center;
+  margin-left: 4px;
+}
+.region-card .region-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(36px, 3.2vw, 48px);
+  line-height: 1;
+  margin: 0 0 14px;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.region-card .region-desc {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-style: italic;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  max-width: 30ch;
+}
+.region-card .region-meta {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-transform: none !important;
+  color: var(--ink-mute);
+  border-top: none !important;
+  padding-top: 22px;
+  margin-top: 28px;
+  position: relative;
+}
+.region-card .region-meta::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 36px; height: 1px;
+  background: var(--accent);
+  opacity: 0.65;
+}
+.region-card .region-arrow {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 24px;
+  color: var(--wine);
+}
+.region-card.region-card-rich::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 3;
+}
+.region-card.region-card-rich:hover::after { transform: scaleX(1); }
+
+/* ── Chip filters (final): italic serif wine list tags ── */
+.chip {
+  font-family: var(--serif) !important;
+  font-style: italic !important;
+  font-size: 15px !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important;
+  font-weight: 400 !important;
+  padding: 7px 18px;
+  border: 1px solid rgba(122, 26, 44, 0.28) !important;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  border-radius: 0 !important;
+  transition: color 0.3s ease, background 0.35s ease, border-color 0.3s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.chip:hover {
+  color: var(--bg-3);
+  border-color: var(--wine) !important;
+  background: var(--wine);
+  transform: translateY(-1px);
+}
+.chip-active {
+  background: var(--wine) !important;
+  color: var(--bg-3) !important;
+  border-color: var(--wine) !important;
+}
+
+/* ── Footer cascade override — kill old .footer styles when .cellar-footer present ── */
+.footer.cellar-footer { padding: 0; }
+.footer.cellar-footer::before { display: none; }
+
+/* ── Eyebrow color: kill the old .eyebrow class influence in wine-eyebrow contexts ── */
+.wine-eyebrow { text-transform: none; }
+.regions-head .eyebrow,
+.section-head .eyebrow,
+.trade-inner .eyebrow,
+.glass-text .eyebrow {
+  display: none; /* kill any leftover .eyebrow class in JSX */
+}
+
+/* ── Display headings: bias toward italic serif for wine feel ───── */
+.regions-head .display-l em,
+.section-head .display-l em,
+.glass-text .display-xl em,
+.trade-inner .display-xl em {
+  color: var(--wine);
+  font-style: italic;
+  font-family: var(--serif);
+  background: none;
+  -webkit-text-fill-color: var(--wine);
+}
+
+/* Regions head — center the wine-eyebrow */
+.regions-head .wine-eyebrow,
+.section-head .wine-eyebrow,
+.trade-inner .wine-eyebrow {
+  display: inline-flex;
+  margin-bottom: 8px;
+}
+.regions-head, .section-head, .trade-inner { text-align: center; }
+.regions-head .lede, .section-head .lede, .trade-inner .lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .section-rest { padding: 64px 4vw 60px; }
+  .section-rest-inner { gap: 20px; }
+  .section-rest-inner .vine-sprig:first-child,
+  .section-rest-inner .vine-sprig:last-child { display: none; }
+  .section-rest-phrase { font-size: 22px; }
+  .cellar-footer-grid { grid-template-columns: 1fr; gap: 48px; padding: 36px 6vw 60px; }
+  .cellar-columns { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .cellar-fine { flex-direction: column; gap: 12px; text-align: center; }
+  .cellar-fine-left, .cellar-fine-right { justify-content: center; }
+  .winery-grid.is-curated { grid-template-columns: 1fr; }
+  .winery-card.winery-card-featured { grid-column: span 1; padding: 40px 28px; }
+  .winery-card-featured::before { top: 20px; right: 18px; font-size: 12px; padding: 6px 12px; }
+  .winery-card-featured .winery-meta { grid-template-columns: 1fr; gap: 18px; }
+  .trade-stats.vintage-stats { padding: 50px 0 30px; }
+  .trade-stats.vintage-stats { grid-template-columns: repeat(2, 1fr); gap: 36px; }
+  .trade-stats.vintage-stats li + li::before { display: none; }
+  .trade-stats.vintage-stats .stat-num { font-size: clamp(44px, 12vw, 72px); }
+  .vintage-tag { top: 9vh; left: 4vw; }
+  .vintage-tag-year { font-size: 22px; }
+  .vintage-tag-word { font-size: 8.5px; letter-spacing: 0.36em; }
+}
+
+/* ============================================================================
+   TASTE SKILL PASS — Premium polish layer
+   ============================================================================
+   Three additions, in order of cascade dependency:
+     1. Motion tokens (CSS vars consumed everywhere below)
+     2. Premium CTA button-in-button system (pseudo-element approach)
+     3. Double-bezel card architecture (region + winery + featured)
+     4. Cinematic entry + hover motion grammar
+   ============================================================================ */
+
+/* ── 1. Motion tokens — easings + durations + tinted shadows ─── */
+:root {
+  --ease-fluid:      cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-heavy:  cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out-soft:   cubic-bezier(0.16, 1, 0.3, 1);
+
+  --dur-fast:        250ms;
+  --dur-base:        500ms;
+  --dur-slow:        900ms;
+  --dur-cinematic:   1200ms;
+  --dur-display:     1400ms;
+
+  --stagger:         90ms;
+
+  --shadow-wine-sm:  0 6px 18px -8px rgba(90, 14, 31, 0.18);
+  --shadow-wine-md:  0 18px 40px -14px rgba(90, 14, 31, 0.28),
+                     0 4px 10px -4px rgba(42, 24, 16, 0.10);
+  --shadow-gold-md:  0 20px 44px -16px rgba(184, 148, 86, 0.32),
+                     0 4px 10px -4px rgba(42, 24, 16, 0.08);
+}
+
+/* ============================================================
+   2. PREMIUM CTA — button-in-button pill, magnetic hover physics.
+   Pseudo-element ::after carries the trailing arrow icon, no JSX
+   restructure required.
+   ============================================================ */
+.cta-primary,
+.cta-outline {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 18px 68px 18px 32px !important;
+  border-radius: 999px !important;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform, box-shadow, background-color;
+  transition:
+    transform 450ms var(--ease-fluid),
+    background-color 450ms var(--ease-fluid),
+    background-image 450ms var(--ease-fluid),
+    box-shadow 450ms var(--ease-fluid),
+    border-color 450ms var(--ease-fluid),
+    color 450ms var(--ease-fluid);
+}
+.cta-primary > span,
+.cta-outline > span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+/* PRIMARY — solid wine fill, cream text, wine-tinted shadow */
+.cta-primary {
+  background: linear-gradient(180deg, var(--wine-2) 0%, var(--wine) 100%) !important;
+  color: var(--bg-3) !important;
+  border: 1px solid var(--wine) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 1px 2px rgba(90, 14, 31, 0.18),
+    0 8px 20px -8px rgba(90, 14, 31, 0.35);
+}
+.cta-primary::after {
+  content: "↗";
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wine-3);
+  color: var(--bg-3);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translate(0, -50%) scale(1);
+  transform-origin: center;
+  transition:
+    transform 450ms var(--ease-fluid),
+    background-color 450ms var(--ease-fluid);
+}
+.cta-primary:hover {
+  background: linear-gradient(180deg, var(--wine) 0%, var(--wine-2) 100%) !important;
+  transform: scale(1.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(90, 14, 31, 0.22),
+    0 14px 32px -10px rgba(90, 14, 31, 0.5);
+}
+.cta-primary:hover::after {
+  transform: translate(2px, calc(-50% - 2px)) scale(1.08);
+  background: var(--wine-2);
+}
+.cta-primary:active {
+  transform: scale(0.98);
+  transition-duration: 120ms;
+}
+
+/* OUTLINE — transparent fill, wine border, gold-tinted hover shadow */
+.cta-outline {
+  background: transparent !important;
+  color: var(--wine) !important;
+  border: 1px solid var(--wine) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(42, 24, 16, 0.04);
+}
+.cta-outline::after {
+  content: "↗";
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-3);
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translate(0, -50%) scale(1);
+  transition:
+    transform 450ms var(--ease-fluid),
+    background-color 450ms var(--ease-fluid),
+    color 450ms var(--ease-fluid);
+}
+.cta-outline:hover {
+  background: var(--bg-2) !important;
+  border-color: var(--wine-2) !important;
+  color: var(--wine-2) !important;
+  transform: scale(1.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 4px rgba(184, 148, 86, 0.18),
+    0 14px 28px -10px rgba(184, 148, 86, 0.42);
+}
+.cta-outline:hover::after {
+  transform: translate(2px, calc(-50% - 2px)) scale(1.08);
+  background: var(--wine);
+  color: var(--bg-3);
+  border-color: var(--wine);
+}
+.cta-outline:active {
+  transform: scale(0.98);
+  transition-duration: 120ms;
+}
+
+/* GHOST — editorial text link, Cormorant italic, drip underline */
+.cta-ghost {
+  position: relative !important;
+  display: inline-block !important;
+  padding: 4px 2px !important;
+  background-image:
+    linear-gradient(var(--wine), var(--wine)),
+    linear-gradient(var(--ink-dim), var(--ink-dim)) !important;
+  background-size: 0% 1px, 100% 1px !important;
+  background-position: 0 100%, 0 100% !important;
+  background-repeat: no-repeat !important;
+  padding-bottom: 4px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--serif) !important;
+  font-style: italic !important;
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none !important;
+  text-decoration: none !important;
+  line-height: 1.3;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition:
+    color 450ms var(--ease-fluid),
+    background-size 500ms var(--ease-fluid);
+}
+.cta-ghost:hover {
+  color: var(--wine) !important;
+  background-size: 100% 1px, 100% 1px !important;
+}
+.cta-ghost::after,
+.cta-ghost::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* .cta-lg modifier — hero-scale CTAs */
+.cta-primary.cta-lg,
+.cta-outline.cta-lg {
+  padding: 22px 76px 22px 40px !important;
+  font-size: 0.9375rem;
+  letter-spacing: 0.1em;
+}
+.cta-primary.cta-lg::after,
+.cta-outline.cta-lg::after {
+  width: 46px;
+  height: 46px;
+  right: 8px;
+  font-size: 1.125rem;
+}
+.cta-ghost.cta-lg {
+  font-size: 1.25rem !important;
+  padding: 6px 2px !important;
+}
+
+.cta-primary:focus-visible,
+.cta-outline:focus-visible,
+.cta-ghost:focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 3px !important;
+}
+
+/* ============================================================
+   3. DOUBLE-BEZEL CARDS — outer shell + inner core
+   Concentric radii via inset shadows (no borders).
+   Region cards keep their --accent. Winery cards wine-tinted.
+   Featured maker gets a wider bezel + warm gold spotlight.
+   ============================================================ */
+
+/* Region — outer shell */
+article.region-card.region-card-rich {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  padding: 7px !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg-3) 78%, var(--accent, var(--wine)) 22%) 0%,
+    color-mix(in oklab, var(--bg-3) 90%, var(--accent, var(--wine)) 10%) 100%
+  ) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 26, 44, 0.10),
+    inset 0 1px 0 rgba(255, 250, 235, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 18px 32px -22px color-mix(in oklab, var(--accent, var(--wine)) 38%, transparent),
+    0 4px 10px -6px color-mix(in oklab, var(--accent, var(--wine)) 22%, transparent);
+  transition:
+    transform 500ms var(--ease-fluid),
+    box-shadow 500ms var(--ease-fluid),
+    background 500ms var(--ease-fluid);
+  overflow: visible;
+}
+/* Region — inner core via ::before */
+article.region-card.region-card-rich::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 17px;
+  background:
+    radial-gradient(130% 85% at 80% 0%,
+      color-mix(in oklab, var(--accent, var(--wine)) 42%, transparent) 0%,
+      color-mix(in oklab, var(--accent, var(--wine)) 12%, transparent) 35%,
+      transparent 70%),
+    linear-gradient(165deg,
+      var(--bg-3) 0%,
+      var(--bg-4) 50%,
+      color-mix(in oklab, var(--bg-2) 80%, var(--accent, var(--wine)) 20%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 0 0 1px rgba(122, 26, 44, 0.06);
+  transition:
+    background 500ms var(--ease-fluid),
+    box-shadow 500ms var(--ease-fluid);
+  z-index: 0;
+  pointer-events: none;
+}
+/* Lift content above inner core */
+article.region-card.region-card-rich > * {
+  position: relative;
+  z-index: 1;
+}
+/* Watermark clipped to inner core radius */
+article.region-card.region-card-rich .region-watermark {
+  position: absolute;
+  inset: 7px;
+  border-radius: 17px;
+  overflow: hidden;
+  z-index: 0;
+  opacity: 0.18;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+article.region-card.region-card-rich:hover .region-watermark {
+  opacity: 0.28;
+}
+/* Content padding lives on children, not the shell */
+article.region-card.region-card-rich .region-num,
+article.region-card.region-card-rich .region-motif-wrap,
+article.region-card.region-card-rich .region-name,
+article.region-card.region-card-rich .region-desc,
+article.region-card.region-card-rich .region-meta,
+article.region-card.region-card-rich .region-arrow {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+article.region-card.region-card-rich .region-num {
+  margin-top: 26px;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+}
+article.region-card.region-card-rich .region-motif-wrap { margin-top: 22px; }
+article.region-card.region-card-rich .region-name { margin-top: 16px; }
+article.region-card.region-card-rich .region-desc { margin-top: 14px; }
+article.region-card.region-card-rich .region-meta { margin-top: 22px; }
+article.region-card.region-card-rich .region-arrow { margin-bottom: 26px; }
+
+/* Bottom accent stripe on inner core lip */
+article.region-card.region-card-rich::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 7px;
+  height: 2px;
+  border-bottom-left-radius: 17px;
+  border-bottom-right-radius: 17px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent, var(--wine)) 50%,
+    transparent 100%);
+  transform: scaleX(0.18);
+  transform-origin: center;
+  opacity: 0.55;
+  transition:
+    transform 500ms var(--ease-fluid),
+    opacity 500ms var(--ease-fluid);
+  z-index: 2;
+  pointer-events: none;
+}
+/* Hover — shell lifts, inner warms, stripe extends */
+article.region-card.region-card-rich:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 26, 44, 0.14),
+    inset 0 1px 0 rgba(255, 250, 235, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 32px 48px -24px color-mix(in oklab, var(--accent, var(--wine)) 50%, transparent),
+    0 10px 18px -10px color-mix(in oklab, var(--accent, var(--wine)) 30%, transparent);
+}
+article.region-card.region-card-rich:hover::before {
+  background:
+    radial-gradient(130% 90% at 85% -10%,
+      color-mix(in oklab, var(--accent, var(--wine)) 26%, transparent) 0%,
+      transparent 58%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--bg-4) 92%, var(--bg-2) 8%) 0%,
+      color-mix(in oklab, var(--bg-4) 80%, var(--bg-2) 20%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 0 0 1px rgba(122, 26, 44, 0.09);
+}
+article.region-card.region-card-rich:hover::after {
+  transform: scaleX(1);
+  opacity: 0.9;
+}
+
+/* Winery — outer shell */
+article.winery-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  padding: 8px !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg-3) 90%, var(--wine) 5%) 0%,
+    var(--bg-3) 100%
+  ) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 26, 44, 0.12),
+    inset 0 1px 0 rgba(255, 250, 235, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 16px 30px -22px rgba(90, 14, 31, 0.30),
+    0 4px 10px -6px rgba(90, 14, 31, 0.18) !important;
+  transition:
+    transform 500ms var(--ease-fluid),
+    box-shadow 500ms var(--ease-fluid),
+    background 500ms var(--ease-fluid);
+  overflow: visible;
+  min-height: auto;
+}
+/* Winery — inner core */
+article.winery-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    var(--bg-4) 0%,
+    color-mix(in oklab, var(--bg-4) 90%, var(--bg-2) 10%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(122, 26, 44, 0.06);
+  transition:
+    background 500ms var(--ease-fluid),
+    box-shadow 500ms var(--ease-fluid);
+  z-index: 0;
+  pointer-events: none;
+}
+article.winery-card > * {
+  position: relative;
+  z-index: 1;
+}
+article.winery-card .winery-mark,
+article.winery-card .winery-name,
+article.winery-card .winery-region,
+article.winery-card .winery-meta,
+article.winery-card .winery-link {
+  margin-left: 26px;
+  margin-right: 26px;
+}
+article.winery-card .winery-mark { margin-top: 28px; }
+article.winery-card .winery-link { margin-bottom: 28px; }
+
+/* Winery bottom accent stripe */
+article.winery-card::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  height: 2px;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--wine) 50%,
+    transparent 100%);
+  transform: scaleX(0.16);
+  transform-origin: center;
+  opacity: 0.5;
+  transition:
+    transform 500ms var(--ease-fluid),
+    opacity 500ms var(--ease-fluid);
+  z-index: 2;
+  pointer-events: none;
+}
+article.winery-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 0 1px rgba(122, 26, 44, 0.16),
+    inset 0 1px 0 rgba(255, 250, 235, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 30px 46px -24px rgba(90, 14, 31, 0.38),
+    0 10px 18px -10px rgba(90, 14, 31, 0.24) !important;
+}
+article.winery-card:hover::before {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg-4) 94%, var(--gold) 6%) 0%,
+    color-mix(in oklab, var(--bg-4) 84%, var(--bg-2) 16%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px rgba(122, 26, 44, 0.09);
+}
+article.winery-card:hover::after {
+  transform: scaleX(1);
+  opacity: 0.85;
+}
+
+/* Featured Maker — wider bezel, gold spotlight, brighter ring */
+article.winery-card.winery-card-featured {
+  padding: 11px !important;
+  border-radius: 28px !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--bg-3) 86%, var(--gold) 8%) 0%,
+    color-mix(in oklab, var(--bg-3) 94%, var(--wine) 4%) 100%
+  ) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(184, 148, 86, 0.28),
+    inset 0 1px 0 rgba(255, 250, 235, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.75),
+    0 24px 44px -24px rgba(138, 107, 58, 0.34),
+    0 6px 14px -8px rgba(90, 14, 31, 0.22) !important;
+}
+article.winery-card.winery-card-featured::before {
+  inset: 11px;
+  border-radius: 17px;
+  background:
+    radial-gradient(90% 70% at 88% 8%,
+      rgba(184, 148, 86, 0.18) 0%,
+      rgba(184, 148, 86, 0.08) 30%,
+      transparent 60%),
+    radial-gradient(60% 50% at 12% 100%,
+      rgba(90, 14, 31, 0.06) 0%,
+      transparent 70%),
+    linear-gradient(180deg,
+      var(--bg-4) 0%,
+      color-mix(in oklab, var(--bg-4) 88%, var(--bg-2) 12%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px rgba(184, 148, 86, 0.10);
+}
+article.winery-card.winery-card-featured::after {
+  left: 11px;
+  right: 11px;
+  bottom: 11px;
+  border-bottom-left-radius: 17px;
+  border-bottom-right-radius: 17px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--gold) 35%,
+    var(--wine) 65%,
+    transparent 100%);
+  transform: scaleX(0.32);
+  opacity: 0.7;
+}
+article.winery-card.winery-card-featured:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 0 0 1px rgba(184, 148, 86, 0.40),
+    inset 0 1px 0 rgba(255, 250, 235, 1),
+    0 1px 0 rgba(255, 255, 255, 0.85),
+    0 40px 60px -26px rgba(138, 107, 58, 0.44),
+    0 14px 22px -12px rgba(90, 14, 31, 0.28) !important;
+}
+article.winery-card.winery-card-featured:hover::after {
+  transform: scaleX(1);
+  opacity: 0.95;
+}
+
+/* ============================================================
+   4. CINEMATIC MOTION — heavier entry + parallax-within-card hovers
+   ============================================================ */
+.reveal-up {
+  opacity: 0;
+  transform: translate3d(0, 60px, 0);
+  filter: blur(12px);
+  will-change: transform, opacity, filter;
+  transition:
+    opacity   var(--dur-cinematic) var(--ease-fluid),
+    transform var(--dur-cinematic) var(--ease-fluid),
+    filter    var(--dur-cinematic) var(--ease-fluid);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+.reveal-up.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+  will-change: auto;
+}
+
+/* Hero-display variant — "rising from depth" */
+.reveal-up-heavy {
+  opacity: 0;
+  transform: translate3d(0, 80px, 0) scale(0.96);
+  filter: blur(16px);
+  transform-origin: center bottom;
+  will-change: transform, opacity, filter;
+  transition:
+    opacity   var(--dur-display) var(--ease-fluid),
+    transform var(--dur-display) var(--ease-fluid),
+    filter    var(--dur-display) var(--ease-fluid);
+  transition-delay: calc(var(--i, 0) * var(--stagger));
+}
+.reveal-up-heavy.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+  will-change: auto;
+}
+
+/* Word-by-word slide reveal — heavier curve, longer travel */
+.reveal-text-mask .word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.05;
+}
+.reveal-text-mask .word-inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  will-change: transform;
+  transition: transform var(--dur-display) var(--ease-fluid);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.reveal-text-mask.is-visible .word-inner {
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Region watermark — parallax-within-card on hover */
+.region-card .region-watermark {
+  transition: transform var(--dur-slow) var(--ease-fluid),
+              opacity   var(--dur-slow) var(--ease-fluid);
+  will-change: transform;
+}
+.region-card:hover .region-watermark {
+  transform: translate3d(10px, -2px, 0);
+}
+
+/* Nav underline — heavier draw on the signature curve */
+.nav-links a::after {
+  transition: transform 600ms var(--ease-fluid);
+}
+
+/* Reduced motion — keep opacity only */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up,
+  .reveal-up-heavy {
+    transform: none;
+    filter: none;
+    transition: opacity var(--dur-base) var(--ease-out-soft);
+    transition-delay: 0ms;
+  }
+  .reveal-up.is-visible,
+  .reveal-up-heavy.is-visible {
+    transform: none;
+    filter: none;
+  }
+  .reveal-text-mask .word { overflow: visible; }
+  .reveal-text-mask .word-inner {
+    transform: none;
+    transition: opacity var(--dur-base) var(--ease-out-soft);
+    transition-delay: 0ms;
+  }
+  article.region-card.region-card-rich:hover,
+  article.winery-card:hover,
+  article.winery-card.winery-card-featured:hover {
+    transform: none;
+  }
+  .region-card:hover .region-watermark { transform: none; }
+  .cta-primary:hover,
+  .cta-outline:hover,
+  .cta-primary:hover::after,
+  .cta-outline:hover::after { transform: translate(0, -50%) scale(1); }
+}
+
+/* Mobile — tighten card bezels + simplify reveal blur */
+@media (max-width: 700px) {
+  article.region-card.region-card-rich,
+  article.winery-card {
+    padding: 5px !important;
+    border-radius: 18px !important;
+  }
+  article.region-card.region-card-rich::before,
+  article.winery-card::before {
+    inset: 5px;
+    border-radius: 13px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+  article.region-card.region-card-rich .region-watermark {
+    inset: 5px;
+    border-radius: 13px;
+  }
+  article.region-card.region-card-rich::after,
+  article.winery-card::after {
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+  }
+  article.region-card.region-card-rich .region-num,
+  article.region-card.region-card-rich .region-motif-wrap,
+  article.region-card.region-card-rich .region-name,
+  article.region-card.region-card-rich .region-desc,
+  article.region-card.region-card-rich .region-meta,
+  article.region-card.region-card-rich .region-arrow,
+  article.winery-card .winery-mark,
+  article.winery-card .winery-name,
+  article.winery-card .winery-region,
+  article.winery-card .winery-meta,
+  article.winery-card .winery-link {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+  article.region-card.region-card-rich .region-num,
+  article.winery-card .winery-mark { margin-top: 20px; }
+  article.region-card.region-card-rich .region-arrow,
+  article.winery-card .winery-link { margin-bottom: 20px; }
+
+  article.winery-card.winery-card-featured {
+    padding: 7px !important;
+    border-radius: 20px !important;
+  }
+  article.winery-card.winery-card-featured::before {
+    inset: 7px;
+    border-radius: 13px;
+  }
+  article.winery-card.winery-card-featured::after {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+  }
+
+  /* Reduce reveal blur on mobile to keep performance smooth */
+  .reveal-up {
+    transform: translate3d(0, 40px, 0);
+    filter: blur(8px);
+    transition-duration: 900ms;
+  }
+  .reveal-up-heavy {
+    transform: translate3d(0, 50px, 0) scale(0.98);
+    filter: blur(10px);
+    transition-duration: 1000ms;
+  }
+
+  /* CTA bottom spacing on mobile */
+  .cta-primary,
+  .cta-outline {
+    padding: 16px 60px 16px 28px !important;
+  }
+  .cta-primary::after,
+  .cta-outline::after {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ============================================================================
+   CALM PASS — restraint over decoration
+   Strip competing layers so typography and message carry the page.
+   ============================================================================ */
+
+/* ── 1. CinemaStage editorial caption strip ─────────────────────────────
+   Pull story-text + flow-text out of the bottom-right caption corner.
+   Centre them as full-width editorial moments at the foot of the frame.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Extend the video bottom-mask to give the caption a clean cream backdrop */
+.scrub-video-frame .scrub-video-mask {
+  background:
+    radial-gradient(ellipse 60% 50% at 78% 105%,
+      rgba(244, 236, 216, 1) 0%,
+      rgba(244, 236, 216, 0.94) 22%,
+      rgba(244, 236, 216, 0.55) 50%,
+      rgba(244, 236, 216, 0) 80%),
+    linear-gradient(180deg,
+      transparent 42%,
+      rgba(244, 236, 216, 0.18) 56%,
+      rgba(244, 236, 216, 0.62) 72%,
+      rgba(244, 236, 216, 0.94) 88%,
+      rgba(244, 236, 216, 1) 100%);
+}
+
+.cinema-sticky .story-text,
+.cinema-sticky .flow-text {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 9vh !important;
+  top: auto !important;
+  transform: none !important;
+  max-width: 980px !important;
+  margin: 0 auto !important;
+  padding: 0 6vw !important;
+  text-align: center !important;
+  z-index: 6;
+}
+
+.cinema-sticky .story-text .wine-eyebrow,
+.cinema-sticky .flow-text .wine-eyebrow {
+  justify-content: center !important;
+  margin-bottom: 20px !important;
+  font-size: clamp(13px, 0.95vw, 16px) !important;
+  letter-spacing: 0.02em !important;
+}
+.cinema-sticky .story-text .wine-eyebrow::after,
+.cinema-sticky .flow-text .wine-eyebrow::after {
+  display: none !important;
+}
+
+.cinema-sticky .story-text .display-l,
+.cinema-sticky .flow-text .display-l {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(44px, 5.4vw, 88px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.015em !important;
+  margin: 0 !important;
+  color: var(--ink);
+  text-wrap: balance;
+  text-align: center !important;
+  text-shadow:
+    0 0 18px rgba(244, 236, 216, 0.65),
+    0 0 1px rgba(244, 236, 216, 0.9);
+}
+.cinema-sticky .story-text .display-l em,
+.cinema-sticky .flow-text .display-l em {
+  color: var(--wine);
+  font-style: italic;
+  background: none;
+  -webkit-text-fill-color: var(--wine);
+}
+
+.cinema-sticky .story-text .lede {
+  margin: 26px auto 0 !important;
+  max-width: 58ch !important;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.15vw, 19px);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  text-align: center !important;
+}
+
+/* The flow-text headline doesn't have a lede; just the title */
+.cinema-sticky .flow-text .display-l {
+  font-size: clamp(48px, 6vw, 104px) !important;
+}
+
+/* ── 2. Region cards — strip the layers ─────────────────────────────────
+   Single clean cream card. One accent swatch + Roman numeral as a lot
+   mark. Italic serif region name leads. Quiet meta.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Re-base the card — calm cream, no shell tint, no inner radial */
+article.region-card.region-card-rich {
+  padding: 0 !important;
+  background: var(--bg-3) !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 0 0 1px rgba(122, 26, 44, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 8px 24px -20px rgba(60, 30, 20, 0.18) !important;
+  overflow: hidden;
+  transition:
+    transform 500ms var(--ease-fluid),
+    box-shadow 500ms var(--ease-fluid),
+    background 500ms var(--ease-fluid) !important;
+}
+article.region-card.region-card-rich::before {
+  content: none !important;
+}
+article.region-card.region-card-rich::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  height: auto;
+  border-radius: 0 !important;
+  background: var(--accent, var(--wine)) !important;
+  transform: scaleY(0) !important;
+  transform-origin: top center;
+  opacity: 0.85;
+  transition: transform 600ms var(--ease-fluid) !important;
+  z-index: 2;
+  pointer-events: none;
+}
+article.region-card.region-card-rich:hover::after {
+  transform: scaleY(1) !important;
+}
+
+/* Remove the watermark + watermark hover */
+article.region-card.region-card-rich .region-watermark,
+.region-watermark {
+  display: none !important;
+}
+
+/* Card content layout — clean editorial flow */
+article.region-card.region-card-rich {
+  display: grid !important;
+  grid-template-rows: auto auto 1fr auto auto !important;
+  min-height: 380px;
+}
+article.region-card.region-card-rich .region-lot,
+article.region-card.region-card-rich .region-motif-wrap,
+article.region-card.region-card-rich .region-name,
+article.region-card.region-card-rich .region-desc,
+article.region-card.region-card-rich .region-meta {
+  margin-left: 36px !important;
+  margin-right: 36px !important;
+}
+
+/* Lot mark — Roman numeral + small color swatch */
+.region-lot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px !important;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(122, 26, 44, 0.10);
+}
+.region-roman {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  color: var(--wine);
+}
+.region-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Hide the old .region-num completely now that we use .region-lot */
+article.region-card.region-card-rich .region-num {
+  display: none !important;
+}
+
+/* Motif — quieter, monochrome with accent thread */
+article.region-card.region-card-rich .region-motif-wrap {
+  margin-top: 32px !important;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 500ms var(--ease-fluid);
+}
+article.region-card.region-card-rich:hover .region-motif-wrap {
+  opacity: 1;
+}
+article.region-card.region-card-rich .region-motif {
+  width: 110px;
+  height: 56px;
+}
+
+/* Region name — bigger, more confident */
+article.region-card.region-card-rich .region-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 3.2vw, 52px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.012em;
+  margin-top: 22px !important;
+  margin-bottom: 16px !important;
+  color: var(--ink);
+}
+
+/* Description — italic, quieter */
+article.region-card.region-card-rich .region-desc {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 28ch;
+  margin-top: 0 !important;
+  margin-bottom: 28px !important;
+}
+
+/* Meta — thin rule above, small caps */
+article.region-card.region-card-rich .region-meta {
+  font-family: var(--sans) !important;
+  font-style: normal !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.32em !important;
+  text-transform: uppercase !important;
+  color: var(--ink-mute) !important;
+  margin-bottom: 36px !important;
+  margin-top: 0 !important;
+  padding-top: 22px !important;
+  border-top: 1px solid rgba(122, 26, 44, 0.10) !important;
+  position: relative;
+}
+article.region-card.region-card-rich .region-meta::before {
+  display: none !important;
+}
+
+/* Hover — calm lift, no extreme transforms */
+article.region-card.region-card-rich:hover {
+  transform: translateY(-2px);
+  background: var(--bg-4) !important;
+  box-shadow:
+    0 0 0 1px rgba(122, 26, 44, 0.10),
+    0 1px 0 rgba(255, 255, 255, 0.85),
+    0 22px 40px -22px rgba(60, 30, 20, 0.28) !important;
+}
+
+/* ── 3. Regions section — more whitespace, less atmosphere ─────────────── */
+.regions {
+  padding: 200px 6vw 220px !important;
+  background: var(--bg) !important;
+}
+.regions::before {
+  display: none !important;
+}
+.regions .depth-haze-top {
+  display: none !important;
+}
+.regions .scene-fade-edge::before,
+.regions .scene-fade-edge::after {
+  display: none !important;
+}
+.regions .regions-head {
+  margin: 0 auto 120px !important;
+  max-width: 880px !important;
+}
+.regions .regions-head .wine-eyebrow {
+  margin-bottom: 28px !important;
+}
+.regions .regions-head .display-l {
+  font-size: clamp(48px, 5.8vw, 88px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.018em;
+}
+.regions .regions-head .lede {
+  margin-top: 28px !important;
+  max-width: 56ch;
+}
+.regions .regions-grid {
+  gap: 36px !important;
+  background: transparent !important;
+  border: none !important;
+  max-width: 1320px;
+}
+
+/* ── 4. Section-rest dividers — calm single fleuron ─────────────────── */
+.section-rest.section-rest-calm {
+  padding: 80px 6vw 80px !important;
+  background: var(--bg) !important;
+  position: relative;
+}
+.section-rest.section-rest-calm::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(180deg, transparent, rgba(122, 26, 44, 0.35), transparent);
+}
+.section-rest.section-rest-calm .section-rest-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.section-rest.section-rest-calm .section-rest-phrase {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(17px, 1.4vw, 22px) !important;
+  font-weight: 400;
+  color: var(--ink-dim) !important;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.005em;
+}
+.section-rest.section-rest-calm .vine-sprig {
+  display: none !important;
+}
+
+/* ── 5. Remove ambient noise from regions area ────────────────────────── */
+.regions .god-rays,
+.regions .dust-motes,
+.regions .lens-flare,
+.regions .cinema-vignette {
+  display: none !important;
+}
+
+/* ── 6. Soften the global film grain a touch — was 0.07, now 0.04 ────── */
+.film-grain {
+  opacity: 0.04 !important;
+}
+
+/* ── 7. Mobile adjustments ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .cinema-sticky .story-text,
+  .cinema-sticky .flow-text {
+    bottom: 7vh !important;
+    padding: 0 4vw !important;
+  }
+  .cinema-sticky .story-text .display-l,
+  .cinema-sticky .flow-text .display-l {
+    font-size: clamp(36px, 9vw, 56px) !important;
+  }
+  .cinema-sticky .story-text .lede {
+    font-size: 15px !important;
+    margin-top: 18px !important;
+  }
+  .regions {
+    padding: 120px 5vw 140px !important;
+  }
+  .regions .regions-head {
+    margin: 0 auto 70px !important;
+  }
+  .regions .regions-head .display-l {
+    font-size: clamp(38px, 10vw, 60px) !important;
+  }
+  .regions .regions-grid {
+    gap: 24px !important;
+  }
+  article.region-card.region-card-rich {
+    min-height: 340px;
+    border-radius: 3px !important;
+  }
+  article.region-card.region-card-rich .region-lot,
+  article.region-card.region-card-rich .region-motif-wrap,
+  article.region-card.region-card-rich .region-name,
+  article.region-card.region-card-rich .region-desc,
+  article.region-card.region-card-rich .region-meta {
+    margin-left: 26px !important;
+    margin-right: 26px !important;
+  }
+  article.region-card.region-card-rich .region-name {
+    font-size: 38px !important;
+  }
+  article.region-card.region-card-rich .region-desc {
+    font-size: 15.5px;
+  }
+  .section-rest.section-rest-calm {
+    padding: 60px 5vw 60px !important;
+  }
+  .section-rest.section-rest-calm .section-rest-phrase {
+    font-size: 17px !important;
+  }
+}
+
+/* ============================================================================
+   HEADLINE POSITIONING — surgical
+   Two changes, desktop-only so mobile keeps the centered-bottom layout.
+   1) CinemaStage story-text → upper-right, above the wine stream
+   2) GlassStage glass-text → left side of the glass
+   ============================================================================ */
+
+@media (min-width: 901px) {
+  /* ── 1) Story-text → upper-right, above the wine stream ───────────────
+     The wine pours from the bottle's mouth (upper-center) diagonally to
+     the bottom-right. Placing the headline at top-right keeps it ABOVE
+     the stream's trajectory while letting the bottle and stream stay
+     clearly visible on the left side of the frame. */
+  .cinema-sticky .story-text {
+    left: auto !important;
+    right: 5vw !important;
+    bottom: auto !important;
+    top: 13vh !important;
+    transform: none !important;
+    max-width: 540px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: right !important;
+  }
+  .cinema-sticky .story-text .wine-eyebrow {
+    justify-content: flex-end !important;
+    margin-bottom: 20px !important;
+  }
+  .cinema-sticky .story-text .display-l {
+    font-size: clamp(44px, 5vw, 76px) !important;
+    line-height: 1.0 !important;
+    text-align: right !important;
+    text-wrap: balance;
+    /* Stronger shadow because the upper-right area shows the bright sky
+       in the video frame — needs more contrast than the bottom mask zone. */
+    text-shadow:
+      0 0 18px rgba(244, 236, 216, 0.95),
+      0 0 36px rgba(244, 236, 216, 0.75),
+      0 1px 0 rgba(122, 26, 44, 0.18);
+  }
+  .cinema-sticky .story-text .lede {
+    text-align: right !important;
+    margin: 22px 0 0 auto !important;
+    max-width: 46ch !important;
+    font-size: clamp(15px, 1.05vw, 18px) !important;
+    text-shadow:
+      0 0 14px rgba(244, 236, 216, 0.95),
+      0 0 26px rgba(244, 236, 216, 0.7);
+  }
+
+  /* The bottom-gradient mask of the pour-scrub video covers ~bottom 40%.
+     Now that story-text is upper-right, we need a soft cream wash on the
+     UPPER-RIGHT quadrant of the video so the white-light sky doesn't
+     wash out the headline. This is a per-section mask override. */
+  .cinema-section .scrub-video-frame .scrub-video-mask {
+    background:
+      /* Upper-right soft wash for the new story headline area */
+      radial-gradient(ellipse 55% 50% at 88% 12%,
+        rgba(244, 236, 216, 0.55) 0%,
+        rgba(244, 236, 216, 0.32) 30%,
+        rgba(244, 236, 216, 0.10) 55%,
+        rgba(244, 236, 216, 0) 80%),
+      /* Existing bottom-right impact mask — unchanged */
+      radial-gradient(ellipse 60% 50% at 78% 105%,
+        rgba(244, 236, 216, 1) 0%,
+        rgba(244, 236, 216, 0.94) 22%,
+        rgba(244, 236, 216, 0.55) 50%,
+        rgba(244, 236, 216, 0) 80%),
+      /* Existing bottom strip (still used by flow-text caption block) */
+      linear-gradient(180deg,
+        transparent 42%,
+        rgba(244, 236, 216, 0.18) 56%,
+        rgba(244, 236, 216, 0.62) 72%,
+        rgba(244, 236, 216, 0.94) 88%,
+        rgba(244, 236, 216, 1) 100%);
+  }
+
+  /* ── 2) Glass-text → left side of the glass ───────────────────────────
+     The wine glass is centered; the pour comes from upper-center into the
+     glass. Placing the headline on the LEFT of the glass means it sits
+     beside the glass without crossing the stream or covering the glass
+     itself. Mirror the existing right-side mask gradient to the left. */
+  .glass-section .glass-text {
+    right: auto !important;
+    left: 6vw !important;
+    top: 50% !important;
+    transform: translateY(calc(-50% + var(--glass-text-y-shift, 0px))) !important;
+    text-align: left !important;
+    max-width: 500px !important;
+  }
+  .glass-section .glass-text .wine-eyebrow {
+    justify-content: flex-start !important;
+  }
+  .glass-section .glass-text .display-xl {
+    text-align: left !important;
+    font-size: clamp(56px, 6vw, 96px) !important;
+    text-wrap: balance;
+  }
+  .glass-section .glass-text .lede {
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    max-width: 44ch !important;
+  }
+
+  /* Mirror the glass-scrub mask so text legibility shifts left.
+     The earlier mask put the cream wash on the right (where the headline
+     used to live). Now we want it on the LEFT, soft enough to keep the
+     vineyard visible behind the type. */
+  .scrub-video-frame.glass-scrub .scrub-video-mask {
+    background:
+      /* Left-side text legibility fade — mirror of the previous right fade */
+      linear-gradient(90deg,
+        rgba(244, 236, 216, 0.55) 0%,
+        rgba(244, 236, 216, 0.32) 18%,
+        rgba(244, 236, 216, 0.10) 35%,
+        transparent 50%),
+      /* Subtle bottom fade for the export marquee */
+      linear-gradient(180deg,
+        transparent 70%,
+        rgba(244, 236, 216, 0.18) 88%,
+        rgba(244, 236, 216, 0.42) 100%);
+  }
+}
+
+/* ============================================================================
+   QA PASS — readability + layout corrections (May 2026)
+   1. Strengthen lede contrast across hero / story / glass — darker color +
+      stronger shadow so editorial body copy reads cleanly on the busy video
+      backdrops.
+   2. Hide vintage-tag on mobile to stop it colliding with the centered eyebrow.
+   3. Equalise the wineries grid — drop the spanning featured-maker so the
+      bottom row doesn't orphan a single card. Visual emphasis stays via the
+      existing featured-card box-shadow + banderole, not via grid size.
+   ============================================================================ */
+
+/* ── 0. Subtle leftward shift of the bottle in the cinema section ────
+   The bottle is part of the scroll-scrubbed video, so we shift the video
+   itself ~2 vw left and feather the exposed right edge with a cream fade
+   so no raw page background shows through. Scoped strictly to the cinema
+   section — the glass section's centered composition is untouched. */
+@media (min-width: 901px) {
+  .cinema-section .scrub-video-frame .scrub-video {
+    transform: translate3d(-2vw, 0, 0);
+  }
+  .cinema-section .scrub-video-frame .scrub-video-mask {
+    background:
+      /* Right-edge soft cream column — covers the strip the translate
+         exposes (~2 vw). Smooth fade from transparent at 92% to opaque
+         at 100% so the bottle area still reads as photographic. */
+      linear-gradient(90deg, transparent 90%, rgba(244, 236, 216, 0.6) 96%, rgba(244, 236, 216, 1) 100%),
+      /* Upper-right wash for story-text legibility — unchanged from QA pass */
+      radial-gradient(ellipse 55% 50% at 88% 12%,
+        rgba(244, 236, 216, 0.55) 0%,
+        rgba(244, 236, 216, 0.32) 30%,
+        rgba(244, 236, 216, 0.10) 55%,
+        rgba(244, 236, 216, 0) 80%),
+      /* Bottom-right impact mask — unchanged */
+      radial-gradient(ellipse 60% 50% at 78% 105%,
+        rgba(244, 236, 216, 1) 0%,
+        rgba(244, 236, 216, 0.94) 22%,
+        rgba(244, 236, 216, 0.55) 50%,
+        rgba(244, 236, 216, 0) 80%),
+      /* Bottom strip for flow-text caption — unchanged */
+      linear-gradient(180deg,
+        transparent 42%,
+        rgba(244, 236, 216, 0.18) 56%,
+        rgba(244, 236, 216, 0.62) 72%,
+        rgba(244, 236, 216, 0.94) 88%,
+        rgba(244, 236, 216, 1) 100%);
+  }
+}
+
+/* On mobile the video is heavily cover-cropped horizontally — a small
+   object-position bump shifts the bottle slightly left without clipping it
+   off the left edge. The default (32% from the prior pass) was centered;
+   38% pushes the bottle a hair to the left of centre — subtle, not extreme. */
+@media (max-width: 900px) {
+  .cinema-section .scrub-video {
+    object-position: 38% 32% !important;
+  }
+}
+
+/* ── 1. Lede contrast bump ─────────────────────────────────────────────
+   Move from --ink-dim (#6b5644) → --ink (#2a1810) for the three editorial
+   ledes that overlay video backdrops, with stronger ivory shadow. */
+.cinema-sticky .hero-text .lede,
+.cinema-sticky .story-text .lede,
+.glass-section .glass-text .lede {
+  color: var(--ink) !important;
+  font-weight: 400 !important;
+  text-shadow:
+    0 0 16px rgba(244, 236, 216, 1),
+    0 0 32px rgba(244, 236, 216, 0.85),
+    0 0 56px rgba(244, 236, 216, 0.55),
+    0 1px 0 rgba(122, 26, 44, 0.16) !important;
+}
+
+/* ── 2. Mobile vintage-tag — hide so it doesn't collide with eyebrow ── */
+@media (max-width: 700px) {
+  .cinema-sticky .vintage-tag {
+    display: none !important;
+  }
+}
+
+/* ── 3. Wineries grid — equalise so no card is orphaned ─────────────── */
+.winery-card.winery-card-featured {
+  /* Keep featured visually prominent via shell colour + banderole + shadow,
+     but remove the column span so 6 cards land in a clean 3×2 grid. */
+  grid-column: span 1 !important;
+}
+
+/* Compensate for the lost width by tuning typography down a touch on the
+   featured card so its scale still differentiates it from siblings. */
+.winery-card.winery-card-featured .winery-name {
+  font-size: clamp(30px, 2.4vw, 38px) !important;
+}
+.winery-card.winery-card-featured .winery-meta {
+  grid-template-columns: 1fr !important;
+  display: block !important;
+}
+.winery-card.winery-card-featured .winery-meta > div {
+  grid-template-columns: 80px 1fr !important;
+  display: grid !important;
+  margin-bottom: 14px;
+}
+.winery-card.winery-card-featured .winery-meta dd {
+  font-size: 15.5px !important;
+}
+.winery-card.winery-card-featured::before {
+  /* Smaller banderole now that the card is one column wide */
+  font-size: 11.5px !important;
+  padding: 6px 12px !important;
+  top: 22px !important;
+  right: 22px !important;
+}
+

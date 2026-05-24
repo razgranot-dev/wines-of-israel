@@ -1,0 +1,17 @@
+# Local agent / tooling configs
+.claude/
+.agents/
+skills-lock.json
+SKILL*.md
+
+# Generated test screenshots (~400MB; not site content)
+screenshots/
+
+# Vercel / Node
+.vercel/
+node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
