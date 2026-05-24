@@ -1,4 +1,24 @@
-# Inherits .gitignore. Extra exclusions for the live deploy:
-serve.py
-design.md
+# Vercel does NOT inherit .gitignore — every exclusion must be listed here.
+
+# Local agent / tooling configs
+.claude/
+.agents/
+skills-lock.json
+SKILL*.md
+
+# Generated test screenshots (~400MB; not site content)
+screenshots/
+
+# Sketches and design docs (not shipped)
 scraps/
+design.md
+
+# Local dev server (Python http.server replacement)
+serve.py
+
+# Build / OS / editor noise
+.vercel/
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
