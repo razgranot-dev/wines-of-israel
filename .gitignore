@@ -11,6 +11,11 @@ screenshots/
 .vercel/
 node_modules/
 
+# Secrets — never commit local .env
+.env
+.env.local
+.env.*.local
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

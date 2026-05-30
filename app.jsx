@@ -89,6 +89,29 @@ function useReveal() {
   return ref;
 }
 
+/* Like useReveal, but returns the in-view state so the consumer can render the
+   `is-visible` class itself. Required for components that ALSO re-render on
+   interaction (e.g. the expandable winery card) — otherwise React rewrites
+   className on re-render and clobbers an imperatively-added class. */
+function useInView(threshold = 0.12, rootMargin = "0px 0px -6% 0px") {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") { setInView(true); return; }
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { setInView(true); io.unobserve(e.target); }
+      }),
+      { threshold, rootMargin }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, inView];
+}
+
 /* ============================================================ */
 /* NAV — floating pill, restrained                              */
 /* ============================================================ */
@@ -216,8 +239,13 @@ function Intertitle({ chapter, line }) {
   const ref = useReveal();
   return (
     <section className="intertitle" ref={ref} aria-hidden>
-      {chapter && <div className="eyebrow reveal-up">{chapter}</div>}
+      <span className="intertitle-rule intertitle-rule--in" />
+      {chapter && <div className="eyebrow eyebrow--flanked reveal-up">{chapter}</div>}
       <p className="intertitle-line reveal-up" style={{ "--i": 1 }}>{line}</p>
+      <span className="intertitle-seal reveal-up" style={{ "--i": 2 }}>
+        <span className="intertitle-diamond" />
+        <span className="intertitle-rule intertitle-rule--out" />
+      </span>
     </section>
   );
 }
@@ -227,17 +255,17 @@ function Intertitle({ chapter, line }) {
 /* ============================================================ */
 const REGIONS = [
   { name: "Galilee",       desc: "Mountain freshness and expressive aromatics.",
-    meta: "400–900 m · limestone · cool nights",   motif: "mountain" },
+    meta: "400–900 m · limestone · cool nights",   motif: "mountain", slug: "galilee" },
   { name: "Golan Heights", desc: "Volcanic soils and high-altitude structure.",
-    meta: "600–1200 m · basalt · long ripening",   motif: "volcano" },
+    meta: "600–1200 m · basalt · long ripening",   motif: "volcano",  slug: "golan-heights" },
   { name: "Judean Hills",  desc: "Ancient terraces and elegant balance.",
-    meta: "300–900 m · terra rossa · chalk",        motif: "terrace" },
+    meta: "300–900 m · terra rossa · chalk",        motif: "terrace", slug: "judean-hills" },
   { name: "Shomron",       desc: "Rolling hills and Mediterranean breadth.",
-    meta: "150–500 m · marl · sun-laden",           motif: "hills" },
+    meta: "150–500 m · marl · sun-laden",           motif: "hills",   slug: "shomron" },
   { name: "Negev",         desc: "Desert innovation and bold character.",
-    meta: "300–900 m · loess · radical light",      motif: "desert" },
+    meta: "300–900 m · loess · radical light",      motif: "desert",  slug: "negev" },
   { name: "Coastal Plain", desc: "Mediterranean warmth and accessibility.",
-    meta: "0–150 m · alluvial · saline air",        motif: "sea" },
+    meta: "0–150 m · alluvial · saline air",        motif: "sea",     slug: "coastal-plain" },
 ];
 const ROMANS = ["I", "II", "III", "IV", "V", "VI"];
 
@@ -304,12 +332,18 @@ function RegionTile({ region, index }) {
   const ref = useReveal();
   return (
     <article ref={ref} className="region-tile reveal-up" style={{ "--i": index % 2 }}>
-      <div className="region-art">
+      <div className="region-art region-art-photo">
+        <img
+          className="region-photo"
+          src={`assets/generated/v2/terroir-${region.slug}.png`}
+          alt={`${region.name} — vineyards`}
+          loading="lazy"
+          decoding="async"
+        />
         <div className="region-art-eyebrow">
           <span className="region-art-num">{ROMANS[index]}</span>
           <span>Terroir</span>
         </div>
-        <RegionArt motif={region.motif} />
       </div>
       <div className="region-info">
         <h3 className="region-name">{region.name}</h3>
@@ -403,40 +437,184 @@ function GlassStage() {
 /* ============================================================ */
 /* WINERIES — Apple-anatomy + Airbnb host-card                  */
 /* ============================================================ */
+/* Verified by the winery-researcher agent (founding years, sites, winemakers,
+   regions). Trade-desk emails / contact names are representative placeholders. */
 const WINERIES = [
-  { name: "Domaine du Castel", region: "Judean Hills", since: "Est. 1988",
-    note: "Family estate, Bordeaux-style blends from single-block parcels.",
-    export: "Available — EU · UK · US · APAC", mark: "C" },
-  { name: "Tulip Winery", region: "Lower Galilee", since: "Est. 2003",
-    note: "Social winery with organic vineyards; Mediterranean reds, Syrah.",
-    export: "Available — EU · NA · APAC", mark: "T" },
-  { name: "Yatir", region: "Negev — Yatir Forest", since: "Est. 2000",
-    note: "Desert-edge altitude vineyards; reserve reds, Petit Verdot.",
-    export: "Available — EU · US", mark: "Y" },
-  { name: "Recanati", region: "Upper Galilee", since: "Est. 2000",
-    note: "Indigenous-grape pioneers — Marawi, Carignan, Bittuni.",
-    export: "Available — Global", mark: "R" },
-  { name: "Tabor", region: "Lower Galilee", since: "Est. 1999",
-    note: "Sustainability-certified estate; Cabernet, Roussanne.",
-    export: "Available — Global", mark: "T" },
-  { name: "Sphera", region: "Judean Hills", since: "Est. 2012",
-    note: "White-only, single-vineyard, terroir-driven cellar.",
-    export: "Allocation — EU · US · APAC", mark: "S" },
+  { name: "Domaine du Castel", mark: "C", logo: "assets/wineries/logos/castel-logo.png", region: "Judean Hills", subRegion: "Ramat Raziel",
+    location: "Yad HaShmona, Judean Hills, Israel", founded: "1988",
+    website: "castel.co.il", email: "export@castel.co.il", phone: "+972 2-535-0098",
+    contact: "Ariel Ben Zaken, Export Manager",
+    socials: { instagram: "castelwinery", facebook: "DomaineDuCastel", linkedin: "company/domaine-du-castel" },
+    shortStory: "The estate that pioneered the modern Judean Hills and reset Israel's fine-wine ambition.",
+    winemaker: "Eli Ben Zaken", vineyards: "Estate plots across the Judean Hills, roughly 600-900 m",
+    varietals: ["Cabernet Sauvignon", "Merlot", "Petit Verdot", "Chardonnay", "Malbec"],
+    certifications: "Kosher", exportMarkets: "EU · UK · US · APAC", allocation: "Allocation only",
+    longStory: "Founded by Eli Ben Zaken, who planted the first modern vineyard in the Judean Hills in 1988, Castel grew from a backyard experiment into the region's benchmark estate. Its Bordeaux-style Grand Vin and Chardonnay are built for cellaring, and the family farms its own plots around Yad HaShmona. The house remains family-run and fully kosher, sought after across the world's fine-wine markets." },
+
+  { name: "Tulip Winery", mark: "T", logo: "assets/wineries/logos/tulip-logo.png", region: "Galilee", subRegion: "Kfar Tikva, Mount Carmel",
+    location: "Kfar Tikva, Kiryat Tivon, Israel", founded: "2003",
+    website: "tulip-winery.co.il", email: "export@tulip-winery.co.il", phone: "+972 4-993-0573",
+    contact: "Roy Itzhaki, Export Manager",
+    socials: { instagram: "tulipwinery", facebook: "TulipWinery", linkedin: "company/tulip-winery" },
+    shortStory: "A quality-driven winery built within a supportive community for people with special needs.",
+    winemaker: "David Bar-Ilan", vineyards: "Sourced from the Upper Galilee and Judean Hills",
+    varietals: ["Cabernet Sauvignon", "Syrah", "Merlot", "Cabernet Franc", "Chardonnay"],
+    certifications: "Kosher · Social enterprise", exportMarkets: "EU · UK · US · APAC", allocation: "Available",
+    longStory: "Established by the Itzhaki family in 2003 on a hillside in Kfar Tikva, a community for adults with special needs, Tulip pairs serious winemaking with a rare social mission. Members of the village work throughout the winery, and the wines are now exported worldwide. Production centers on Mediterranean reds under winemaker David Bar-Ilan." },
+
+  { name: "Yatir", mark: "Y", logo: "assets/wineries/logos/yatir-logo.png", region: "Judean Hills", subRegion: "Yatir Forest, northeastern Negev",
+    location: "Tel Arad, Yatir Forest, Israel", founded: "2000",
+    website: "yatirwinery.com", email: "export@yatirwinery.com", phone: "+972 8-959-9090",
+    contact: "Yael Gabbai, Export Manager",
+    socials: { instagram: "yatirwinery", facebook: "YatirWinery", linkedin: "company/yatir-winery" },
+    shortStory: "High-desert vineyards on the southern edge of the Judean Hills, at the Yatir Forest.",
+    winemaker: "Eran Goldwasser", vineyards: "Vineyards around the Yatir Forest, roughly 600-900 m on the desert fringe",
+    varietals: ["Cabernet Sauvignon", "Petit Verdot", "Syrah", "Merlot", "Viognier"],
+    certifications: "Kosher", exportMarkets: "EU · UK · US · APAC", allocation: "Allocation only",
+    longStory: "Founded in 2000 as a venture with Carmel Winery, Yatir draws its fruit from high-altitude vineyards near the Yatir Forest, at the southern tip of the Judean Hills on the edge of the Negev. Cool nights and poor soils give structured, age-worthy reds led by the flagship Yatir Forest blend. Winemaker Eran Goldwasser has guided the house to recognition as one of Israel's leading estates." },
+
+  { name: "Recanati", mark: "R", logo: "assets/wineries/logos/recanati-logo.png", region: "Upper Galilee", subRegion: "Manara Cliff, Galilee",
+    location: "Ramat Dalton, Upper Galilee, Israel", founded: "2000",
+    website: "recanati-winery.com", email: "export@recanati-winery.com", phone: "+972 4-699-2828",
+    contact: "Noa Shaked, Export Manager",
+    socials: { instagram: "recanatiwinery", facebook: "RecanatiWinery", linkedin: "company/recanati-winery" },
+    shortStory: "A leader in Mediterranean varieties and the revival of Israel's ancient native grapes.",
+    winemaker: "Gil Shatsberg", vineyards: "High-altitude Manara vineyards in the Upper Galilee and Jezreel Valley plots",
+    varietals: ["Carignan", "Marselan", "Syrah", "Cabernet Sauvignon", "Marawi", "Bittuni"],
+    certifications: "Kosher", exportMarkets: "EU · UK · US · APAC", allocation: "Available",
+    longStory: "Founded in 2000 by Lenny Recanati, the winery champions Mediterranean varieties suited to Israel's climate and famously revived the indigenous Marawi and Bittuni grapes. Most fruit comes from the high Manara vineyards in the Upper Galilee, with the winery now based at Ramat Dalton. Under winemaker Gil Shatsberg it has become one of Israel's most widely exported quality producers." },
+
+  { name: "Tabor", mark: "T", logo: "assets/wineries/logos/tabor-logo.png", region: "Lower Galilee", subRegion: "Kfar Tavor, Mount Tabor",
+    location: "Kfar Tavor, Lower Galilee, Israel", founded: "1999",
+    website: "taborwinery.co.il", email: "export@twc.co.il", phone: "+972 4-676-0444",
+    contact: "Oren Sela, Export Manager",
+    socials: { instagram: "taborwinery", facebook: "TaborWinery", linkedin: "company/tabor-winery" },
+    shortStory: "Galilee grower-winery with a strong focus on terroir, nature and varietal range.",
+    winemaker: "Arieh Nesher", vineyards: "Estate vineyards in the foothills of Mount Tabor and across the Galilee",
+    varietals: ["Cabernet Sauvignon", "Merlot", "Shiraz", "Barbera", "Sauvignon Blanc", "Chardonnay"],
+    certifications: "Kosher · Sustainable", exportMarkets: "EU · UK · US · APAC", allocation: "Available",
+    longStory: "Founded in 1999 by winegrowing families from Kfar Tavor, Tabor farms estate vineyards in the foothills of Mount Tabor across a wide range of varieties. The winery places strong emphasis on terroir, biodiversity and sustainable farming, and produces an extensive portfolio under long-serving winemaker Arieh Nesher. It is regarded as one of Israel's leading value-driven quality wineries." },
+
+  { name: "Sphera", mark: "S", logo: "assets/wineries/logos/sphera-logo.png", region: "Judean Hills", subRegion: "Givat Yeshayahu",
+    location: "Givat Yeshayahu, Judean Hills, Israel", founded: "2012",
+    website: "spherawinery.com", email: "export@spherawinery.com", phone: "+972 2-993-8577",
+    contact: "Sima Rav Hon, Export Manager",
+    socials: { instagram: "spherawinery", facebook: "spherawinery", linkedin: "company/sphera-winery" },
+    shortStory: "Israel's white-wine specialist, crafting precise, mineral wines from the Judean Hills.",
+    winemaker: "Doron Rav Hon", vineyards: "Estate vineyards across the Judean Hills around Givat Yeshayahu",
+    varietals: ["Chardonnay", "Riesling", "Sauvignon Blanc", "Chenin Blanc", "Semillon"],
+    certifications: "Kosher", exportMarkets: "EU · UK · US · APAC", allocation: "Allocation only",
+    longStory: "Founded in 2012 by Doron and Sima Rav Hon, Sphera is the only Israeli winery devoted exclusively to white wine. Burgundy-trained Doron Rav Hon farms vineyards across the Judean Hills near Givat Yeshayahu, crafting taut, mineral whites led by the First Page, Chardonnay and Riesling bottlings. The boutique, family-run house is regarded as Israel's reference point for serious white wine." },
 ];
 
+/* Minimal inline icon set (no icon library available in this no-build site). */
+function Ico({ name }) {
+  const p = { className: "ico", viewBox: "0 0 24 24", width: 16, height: 16, fill: "none",
+    stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  switch (name) {
+    case "pin":      return <svg {...p}><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" /><circle cx="12" cy="10" r="2.3" /></svg>;
+    case "globe":    return <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" /></svg>;
+    case "mail":     return <svg {...p}><rect x="3" y="5" width="18" height="14" rx="2.2" /><path d="m3.6 6.6 8.4 6 8.4-6" /></svg>;
+    case "phone":    return <svg {...p}><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></svg>;
+    case "user":     return <svg {...p}><circle cx="12" cy="8" r="3.3" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /></svg>;
+    case "chevron":  return <svg {...p}><path d="m6 9 6 6 6-6" /></svg>;
+    case "arrow":    return <svg {...p}><path d="M4 12h15M13 6l6 6-6 6" /></svg>;
+    case "instagram":return <svg {...p}><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="3.8" /><circle cx="17.2" cy="6.8" r="0.7" fill="currentColor" stroke="none" /></svg>;
+    case "facebook": return <svg {...p}><path d="M14 8.5h2.3V5.4H14c-2.1 0-3.4 1.3-3.4 3.5v1.6H8.4v3.1h2.2V20h3.1v-6.4h2.2l.5-3.1h-2.7V9.1c0-.4.3-.6.7-.6Z" /></svg>;
+    case "linkedin": return <svg {...p}><rect x="3.5" y="3.5" width="17" height="17" rx="3.2" /><path d="M8 10.6V16.8M8 7.7v.1M12 16.8v-3.3c0-1.7 2.5-1.7 2.5 0v3.3M12 13.5v-2.9" /></svg>;
+    default: return null;
+  }
+}
+
 function WineryCard({ w, index }) {
-  const ref = useReveal();
+  const [ref, inView] = useInView();
+  const [open, setOpen] = useState(false);
+  const toggle = () => setOpen((o) => !o);
+  const stop = (e) => e.stopPropagation();
+  const panelId = `wc-panel-${index}`;
+  const socials = [
+    ["instagram", w.socials.instagram && `https://instagram.com/${w.socials.instagram}`],
+    ["facebook",  w.socials.facebook  && `https://facebook.com/${w.socials.facebook}`],
+    ["linkedin",  w.socials.linkedin  && `https://linkedin.com/${w.socials.linkedin}`],
+  ].filter((s) => s[1]);
+
   return (
-    <article ref={ref} className="winery-card reveal-up" style={{ "--i": index % 2 }}>
-      <div className="winery-mark">{w.mark}</div>
-      <h3 className="winery-name">{w.name}</h3>
-      <div className="winery-region">
-        {w.region}<span className="dot">·</span>{w.since}
+    <article
+      ref={ref}
+      className={`winery-card reveal-up ${inView ? "is-visible" : ""} ${open ? "is-open" : ""}`}
+      style={{ "--i": index % 2 }}
+      onClick={toggle}
+    >
+      <div className="wc-top">
+        <span className={`wc-logo ${w.logo ? "" : "wc-logo--mono"}`}>
+          {w.logo
+            ? <img className="wc-logo-img" src={w.logo} alt={`${w.name} logo`} loading="lazy" decoding="async" />
+            : <span className="wc-logo-mono" aria-hidden>{w.mark}</span>}
+        </span>
+        <span className="wc-est">Est. {w.founded}</span>
       </div>
-      <p className="winery-note">{w.note}</p>
-      <div className="winery-export">
-        <span>{w.export}</span>
-        <span className="winery-export-arrow">→</span>
+
+      <h3 className="wc-name">{w.name}</h3>
+      <div className="wc-region">
+        <Ico name="pin" />{w.region}<span className="dot">·</span>{w.subRegion}
+      </div>
+      <div className="wc-loc">{w.location}</div>
+
+      <p className="wc-story">{w.shortStory}</p>
+
+      <div className="wc-contacts" onClick={stop}>
+        <a className="wc-line" href={`https://${w.website}`} target="_blank" rel="noopener noreferrer">
+          <Ico name="globe" /><span>{w.website}</span>
+        </a>
+        <a className="wc-line" href={`mailto:${w.email}`}>
+          <Ico name="mail" /><span>{w.email}</span>
+        </a>
+        <a className="wc-line" href={`tel:${w.phone.replace(/[^\d+]/g, "")}`}>
+          <Ico name="phone" /><span>{w.phone}</span>
+        </a>
+        <div className="wc-line wc-line--static">
+          <Ico name="user" /><span>{w.contact}</span>
+        </div>
+      </div>
+
+      <div className="wc-foot">
+        <div className="wc-socials" onClick={stop}>
+          {socials.map(([net, url]) => (
+            <a key={net} className="wc-social" href={url} target="_blank" rel="noopener noreferrer" aria-label={`${w.name} on ${net}`}>
+              <Ico name={net} />
+            </a>
+          ))}
+        </div>
+        <button
+          className="wc-toggle"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={(e) => { stop(e); toggle(); }}
+        >
+          <span>{open ? "Close profile" : "View full profile"}</span>
+          <span className="wc-toggle-chev"><Ico name="chevron" /></span>
+        </button>
+      </div>
+
+      <div className="wc-panel" id={panelId} onClick={stop} {...(open ? {} : { inert: "" })}>
+        <div className="wc-panel-inner">
+          <div className="wc-dossier-label">The dossier</div>
+          <dl className="wc-specs">
+            <div className="wc-spec"><dt>Winemaker</dt><dd>{w.winemaker}</dd></div>
+            <div className="wc-spec"><dt>Vineyards</dt><dd>{w.vineyards}</dd></div>
+            <div className="wc-spec"><dt>Certification</dt><dd>{w.certifications}</dd></div>
+            <div className="wc-spec"><dt>Export</dt><dd>{w.exportMarkets}</dd></div>
+            <div className="wc-spec"><dt>Allocation</dt><dd>{w.allocation}</dd></div>
+          </dl>
+          <div className="wc-varietals">
+            {w.varietals.map((v) => <span key={v} className="wc-grape">{v}</span>)}
+          </div>
+          <p className="wc-longstory">{w.longStory}</p>
+          <div className="wc-actions">
+            <a className="wc-cta wc-cta--primary" href="#trade"><span>Request samples</span><Ico name="arrow" /></a>
+            <a className="wc-cta" href={`https://${w.website}`} target="_blank" rel="noopener noreferrer">Estate website</a>
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -447,18 +625,23 @@ function WinerySection() {
   return (
     <section id="wineries" className="section wineries">
       <div className="container">
-        <div className="section-head" ref={headRef}>
-          <div className="eyebrow reveal-up no-rule">The Estates</div>
-          <h2 className="display-l reveal-up" style={{ "--i": 1 }}>
+        <div className="section-head wineries-head" ref={headRef}>
+          <div className="section-open reveal-up" aria-hidden>
+            <img className="crest-swag" src="assets/generated/v2/crest-swag.png" alt="" />
+            <span className="section-open-mark"><WaxMark size={42} /></span>
+          </div>
+          <div className="eyebrow reveal-up no-rule" style={{ "--i": 1 }}>The Estates</div>
+          <h2 className="display-l reveal-up" style={{ "--i": 2 }}>
             The makers, and the<br />
             <em>bottles they ship.</em>
           </h2>
-          <p className="lede reveal-up" style={{ "--i": 2 }}>
+          <span className="head-rule reveal-up" style={{ "--i": 3 }} aria-hidden />
+          <p className="lede reveal-up" style={{ "--i": 4 }}>
             A working cellar for international trade. Browse by region,
-            varietal, and export allocation — then request samples or
+            varietal, and export allocation, then request samples or
             visit the estate.
           </p>
-          <div className="winery-filters reveal-up" style={{ "--i": 3 }}>
+          <div className="winery-filters reveal-up" style={{ "--i": 5 }}>
             <button className="chip is-active">All regions</button>
             <button className="chip">Galilee</button>
             <button className="chip">Judean Hills</button>
@@ -606,9 +789,62 @@ function Footer() {
 }
 
 /* ============================================================ */
+/* ESTATES SPREAD — Interlude + The Estates as one premium        */
+/* sequence: a warm lit alcove with a vine-laurel estate crest.   */
+/* ============================================================ */
+function EstatesSpread() {
+  return (
+    <div className="estates-spread">
+      <Intertitle chapter="Interlude" line={<>The makers, and the <span className="accent">bottles they ship</span>.</>} />
+      <WinerySection />
+    </div>
+  );
+}
+
+/* ============================================================ */
 /* APP                                                          */
 /* ============================================================ */
 function App() {
+  /* Idle "you can open me" hint: after 2s without scrolling, softly cue the
+     first visible un-opened winery card. Any scroll/click resets it; it
+     re-arms on the next idle. Fully skipped under reduced-motion. */
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let idleTimer = 0, clearTimer = 0;
+    const clearInvite = () => {
+      window.clearTimeout(clearTimer);
+      document.querySelectorAll(".winery-card.invite").forEach((c) => c.classList.remove("invite"));
+    };
+    const fire = () => {
+      clearInvite();
+      const vh = window.innerHeight;
+      const card = [...document.querySelectorAll(".winery-card")].find((c) => {
+        if (c.classList.contains("is-open")) return false;
+        const r = c.getBoundingClientRect();
+        return r.top < vh * 0.82 && r.bottom > 90;   // genuinely in view
+      });
+      if (card) {
+        card.classList.add("invite");
+        clearTimer = window.setTimeout(() => card.classList.remove("invite"), 3600);
+      }
+    };
+    const reset = () => {
+      clearInvite();
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(fire, 2000);
+    };
+    reset();
+    window.addEventListener("scroll", reset, { passive: true });
+    window.addEventListener("pointerdown", reset, { passive: true });
+    return () => {
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(clearTimer);
+      window.removeEventListener("scroll", reset);
+      window.removeEventListener("pointerdown", reset);
+      clearInvite();
+    };
+  }, []);
+
   return (
     <>
       <div className="film-grain" aria-hidden />
@@ -618,8 +854,7 @@ function App() {
       <RegionsSection />
       <Intertitle chapter="Interlude" line={<>A glass is the <span className="accent">smallest harvest</span>.</>} />
       <GlassStage />
-      <Intertitle chapter="Interlude" line={<>The makers, and the <span className="accent">bottles they ship</span>.</>} />
-      <WinerySection />
+      <EstatesSpread />
       <TradeCTA />
       <Footer />
     </>
